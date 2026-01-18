@@ -1,9 +1,10 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, generateText } from 'ai';
+import { env } from './env';
 
 const openrouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: env.OPENROUTER_API_KEY,
 });
 
 export const AVAILABLE_MODELS = [
