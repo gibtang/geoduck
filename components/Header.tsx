@@ -1,0 +1,62 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+
+export default function Header() {
+  const pathname = usePathname();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = '/signin';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const navLinks = [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/products', label: 'Products' },
+    { href: '/prompts', label: 'Prompts' },
+    { href: '/execute', label: 'Execute Prompt' },
+    { href: '/results', label: 'Results' },
+  ];
+
+  return (
+    <header className="bg-white shadow-sm border-b">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-8">
+            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
+              GEO Platform
+            </Link>
+            <nav className="hidden md:flex space-x-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors hover:text-gray-900 ${
+                    pathname === link.href
+                      ? 'text-gray-900 border-b-2 border-gray-900 pb-1'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
