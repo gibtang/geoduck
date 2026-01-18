@@ -304,6 +304,62 @@ geoduck/
 └── package.json
 ```
 
+## Testing
+
+The project includes comprehensive tests covering unit tests, model tests, and API integration tests.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Test Structure
+
+```
+__tests__/
+├── lib/
+│   └── productDetection.test.ts    # Product detection & sentiment analysis tests
+├── models/
+│   ├── User.test.ts                 # User model tests
+│   ├── Product.test.ts              # Product model tests
+│   ├── Prompt.test.ts               # Prompt model tests
+│   └── Result.test.ts               # Result model tests
+├── api/
+│   ├── products.test.ts             # Products API tests
+│   └── prompts.test.ts              # Prompts API tests
+└── utils/
+    └── mongodb.ts                   # MongoDB test utilities
+```
+
+### Test Coverage
+
+Current test coverage:
+- **Unit Tests**: 56 tests passing
+  - Product mention detection
+  - Sentiment analysis
+  - Context extraction
+  - Keyword matching
+
+- **Model Tests**: All Mongoose models
+  - CRUD operations
+  - Validation
+  - Relationships
+  - Indexes
+
+- **API Tests**: Authentication and CRUD operations
+  - Route protection
+  - Request validation
+  - Response formatting
+  - Error handling
+
 ## Future Enhancements
 
 - [ ] Product import via CSV/JSON
