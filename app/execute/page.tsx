@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
+import { trackExecutePrompt, trackProductMentioned } from '@/lib/ganalytics';
 
 interface Prompt {
   _id: string;
@@ -102,6 +103,25 @@ export default function ExecutePage() {
       if (response.ok) {
         const data = await response.json();
         setResults(data.results);
+
+        // Track execution event
+        const promptCategory = useCustomPrompt ? 'custom' : prompts.find(p => p._id === selectedPrompt)?.title;
+        trackExecutePrompt(
+          AVAILABLE_MODELS.find(m => m.id === selectedModel)?.name || selectedModel,
+          promptCategory,
+          compareModels.length + 1 // Include primary model in count
+        );
+
+        // Track product mentions
+        data.results.forEach((result: ExecutionResult) => {
+          result.productsMentioned.forEach((mention: ProductMention) => {
+            trackProductMentioned(
+              mention.productName,
+              AVAILABLE_MODELS.find(m => m.id === result.model)?.name || result.model,
+              mention.sentiment
+            );
+          });
+        });
       } else {
         const error = await response.json();
         alert(`Error: ${error.error}`);

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
+import { trackDeleteProduct } from '@/lib/ganalytics';
 
 interface Product {
   _id: string;
@@ -54,6 +55,7 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    const productToDelete = products.find(p => p._id === id);
     if (!confirm('Are you sure you want to delete this product?')) {
       return;
     }
@@ -69,6 +71,9 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
+        if (productToDelete) {
+          trackDeleteProduct(productToDelete.name, productToDelete.category);
+        }
         setProducts(products.filter((p) => p._id !== id));
       }
     } catch (error) {

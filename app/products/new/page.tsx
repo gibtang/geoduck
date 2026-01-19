@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { trackCreateProduct } from '@/lib/ganalytics';
 
 export default function NewProductPage() {
   const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ export default function NewProductPage() {
       });
 
       if (response.ok) {
+        trackCreateProduct(formData.name, formData.category);
         router.push('/products');
       }
     } catch (error) {

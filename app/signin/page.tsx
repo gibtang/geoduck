@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackLogin } from '@/lib/ganalytics';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -20,6 +21,7 @@ export default function SignInPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      trackLogin('email');
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');

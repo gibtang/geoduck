@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
+import { trackDeletePrompt } from '@/lib/ganalytics';
 
 interface Prompt {
   _id: string;
@@ -53,6 +54,7 @@ export default function PromptsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    const promptToDelete = prompts.find(p => p._id === id);
     if (!confirm('Are you sure you want to delete this prompt?')) {
       return;
     }
@@ -68,6 +70,9 @@ export default function PromptsPage() {
       });
 
       if (response.ok) {
+        if (promptToDelete) {
+          trackDeletePrompt(promptToDelete.title, promptToDelete.category);
+        }
         setPrompts(prompts.filter((p) => p._id !== id));
       }
     } catch (error) {

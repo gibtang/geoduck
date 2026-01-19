@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { trackSignUp } from '@/lib/ganalytics';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -36,6 +37,7 @@ export default function SignUpPage() {
         throw new Error('Failed to create user in database');
       }
 
+      trackSignUp('email');
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to create account');

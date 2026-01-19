@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { trackLogout } from '@/lib/ganalytics';
 
 export default function Header() {
   const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
+      trackLogout();
       await signOut(auth);
       window.location.href = '/signin';
     } catch (error) {

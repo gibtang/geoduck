@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { trackCreatePrompt } from '@/lib/ganalytics';
 
 export default function NewPromptPage() {
   const [formData, setFormData] = useState({
@@ -46,6 +47,7 @@ export default function NewPromptPage() {
       });
 
       if (response.ok) {
+        trackCreatePrompt(formData.title, formData.category);
         router.push('/prompts');
       }
     } catch (error) {
