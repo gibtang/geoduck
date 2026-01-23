@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEO Platform - Variant 1: Bold/Disruptive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #ff6b6b;
+            --accent-tertiary: #00ff9d;
+            --border-color: #2a2a2a;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Bricolage Grotesque', display;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent-primary);
+        }
+
+        .nav-cta {
+            padding: 0.75rem 2rem;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-cta:hover {
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 8rem 4rem 4rem;
+            gap: 4rem;
+            position: relative;
+            background:
+                linear-gradient(90deg, transparent 49px, var(--border-color) 50px, transparent 51px),
+                linear-gradient(transparent 49px, var(--border-color) 50px, transparent 51px);
+            background-size: 100px 100px;
+            background-position: center center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at top right, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 0.95;
+            margin-bottom: 2rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 span {
+            color: var(--accent-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cta-primary {
+            padding: 1rem 2.5rem;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cta-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .cta-secondary {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cta-secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .hero-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .demo-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-secondary);
+        }
+
+        .demo-dot:nth-child(2) { background: var(--accent-primary); }
+        .demo-dot:nth-child(3) { background: var(--accent-tertiary); }
+
+        .demo-title {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-left: 0.5rem;
+        }
+
+        .demo-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .demo-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .demo-models {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-model {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-model.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .demo-results {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 100px;
+        }
+
+        .demo-results p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .mention {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .demo-cta {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-tertiary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Problem Section */
+        .problem {
+            padding: 8rem 4rem;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            text-align: center;
+        }
+
+        .problem h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 4rem;
+            line-height: 1.1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--accent-primary);
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .problem-text {
+            max-width: 800px;
+            margin: 4rem auto 0;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Solution Section */
+        .solution {
+            padding: 8rem 4rem;
+            background: var(--bg-secondary);
+        }
+
+        .solution h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 3px solid var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0 auto 2rem;
+        }
+
+        .step h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Value Props */
+        .value-props {
+            padding: 8rem 4rem;
+            background: var(--bg-primary);
+        }
+
+        .value-props h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .props-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .prop-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .prop-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .prop-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .prop-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .prop-card p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 10rem 4rem;
+            background: var(--bg-secondary);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            top: -200px;
+            left: -100px;
+            opacity: 0.2;
+        }
+
+        .final-cta::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid var(--accent-secondary);
+            border-radius: 50%;
+            bottom: -150px;
+            right: -50px;
+            opacity: 0.2;
+        }
+
+        .final-cta h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(2rem, 6vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .final-cta p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 4rem;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 6rem 2rem 3rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .props-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">GEO<span>Platform</span></div>
+        <button class="nav-cta">Start Free</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>YOUR PRODUCTS ARE <span>INVISIBLE</span> TO AI SEARCH</h1>
+            <p class="hero-subtitle">Google SGE, Bing Chat, Perplexity. AI search is how customers discover products now. Traditional SEO doesn't work anymore.</p>
+            <div class="hero-ctas">
+                <button class="cta-primary">Start Optimizing Free</button>
+                <button class="cta-secondary">Watch Demo</button>
+            </div>
+        </div>
+        <div class="hero-demo">
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-dot"></div>
+                    <div class="demo-dot"></div>
+                    <div class="demo-dot"></div>
+                    <span class="demo-title">Live Demo</span>
+                </div>
+                <div class="demo-section">
+                    <div class="demo-label">Product</div>
+                    <input class="demo-input" value="Nike Air Zoom Pegasus 40" readonly>
+                </div>
+                <div class="demo-section">
+                    <div class="demo-label">Test Prompt</div>
+                    <input class="demo-input" value="Best running shoes for marathons under $150" readonly>
+                </div>
+                <div class="demo-section">
+                    <div class="demo-label">AI Models</div>
+                    <div class="demo-models">
+                        <span class="demo-model active">Gemini</span>
+                        <span class="demo-model active">GPT-4o</span>
+                        <span class="demo-model">Claude</span>
+                        <span class="demo-model">Llama</span>
+                    </div>
+                </div>
+                <div class="demo-section">
+                    <div class="demo-label">Results</div>
+                    <div class="demo-results">
+                        <p>Based on your query, the top recommendations include:</p>
+                        <p>The <span class="mention">Nike Air Zoom Pegasus 40</span> offers excellent cushioning...</p>
+                        <p><span style="color: var(--accent-tertiary);">✓ Product Mentioned</span> | <span style="color: var(--accent-tertiary);">Positive Sentiment</span></p>
+                    </div>
+                </div>
+                <button class="demo-cta">Try It Yourself →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <h2>THE SEARCH LANDSCAPE<br><span style="color: var(--accent-primary);">SHIFTED OVERNIGHT</span></h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">63%</div>
+                <div class="stat-label">of searches now use AI-generated responses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">150M+</div>
+                <div class="stat-label">daily AI chat users looking for products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">87%</div>
+                <div class="stat-label">never click traditional search results</div>
+            </div>
+        </div>
+        <p class="problem-text">Your products need Generative Engine Optimization. GEO is the new SEO—optimizing for how AI engines discover, understand, and recommend products.</p>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution">
+        <h2>HOW GEO WORKS</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">01</div>
+                <h3>Add Your Products</h3>
+                <p>Import your catalog with names, descriptions, and keywords</p>
+            </div>
+            <div class="step">
+                <div class="step-number">02</div>
+                <h3>Test With Real Queries</h3>
+                <p>Simulate how AI engines respond to customer questions</p>
+            </div>
+            <div class="step">
+                <div class="step-number">03</div>
+                <h3>See Where You Appear</h3>
+                <p>Detect mentions, sentiment, and position in responses</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Props -->
+    <section class="value-props">
+        <h2>WHY GEO MATTERS</h2>
+        <div class="props-grid">
+            <div class="prop-card">
+                <div class="prop-icon">🎯</div>
+                <h3>Precision Detection</h3>
+                <p>Know exactly where your products appear in AI responses and how they're being described</p>
+            </div>
+            <div class="prop-card">
+                <div class="prop-icon">📊</div>
+                <h3>Sentiment Insights</h3>
+                <p>Understand if mentions are positive, neutral, or negative to optimize your product descriptions</p>
+            </div>
+            <div class="prop-card">
+                <div class="prop-icon">⚡</div>
+                <h3>Multi-Model Testing</h3>
+                <p>Test against 7 AI models simultaneously—Gemini, GPT-4o, Claude, Llama, and more</p>
+            </div>
+            <div class="prop-card">
+                <div class="prop-icon">🔄</div>
+                <h3>Continuous Tracking</h3>
+                <p>Monitor your visibility trends over time and stay ahead of the competition</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>DON'T GET LEFT BEHIND<br>IN THE AI SEARCH REVOLUTION</h2>
+        <p>Start optimizing your products for AI search today</p>
+        <button class="cta-primary" style="font-size: 1.3rem; padding: 1.25rem 3rem;">Start Your Free Optimization</button>
+        <p style="margin-top: 2rem; font-size: 1rem;">No credit card required • 5 free analyses daily</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 GEO Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>

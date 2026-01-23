@@ -6,6 +6,7 @@ import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { trackSignUp } from '@/lib/ganalytics';
+import GoogleSignIn from '@/components/GoogleSignIn';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -44,6 +45,10 @@ export default function SignUpPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = () => {
+    trackSignUp('google');
   };
 
   return (
@@ -98,6 +103,21 @@ export default function SignUpPage() {
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <GoogleSignIn
+            mode="signup"
+            onSuccess={handleGoogleSuccess}
+            onError={setError}
+          />
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{' '}

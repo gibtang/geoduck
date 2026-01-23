@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEO Platform - Variant 2: Editorial/Magazine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #faf8f5;
+            --bg-secondary: #f5f2ed;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5a5a5a;
+            --accent-primary: #0a1628;
+            --accent-secondary: #8b1538;
+            --accent-tertiary: #c4a47c;
+            --border-color: #e8e4df;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(250, 248, 245, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--accent-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-cta {
+            padding: 0.875rem 2rem;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            padding: 10rem 4rem 6rem;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 6rem;
+            align-items: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--accent-secondary);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent-secondary);
+        }
+
+        .hero-pullquote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.4;
+            padding-left: 2rem;
+            border-left: 3px solid var(--accent-secondary);
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .cta-primary {
+            padding: 1rem 2.5rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cta-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+
+        .cta-secondary {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 2px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cta-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .hero-demo {
+            position: relative;
+        }
+
+        .demo-frame {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(10, 22, 40, 0.08);
+            position: relative;
+        }
+
+        .demo-frame::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-family: 'Playfair Display', serif;
+            font-size: 8rem;
+            color: var(--accent-tertiary);
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .demo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--accent-primary);
+        }
+
+        .demo-block {
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .demo-field {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            padding: 0.875rem;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .demo-chips {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-chip {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .demo-chip.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .demo-output {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            padding: 1.25rem;
+            min-height: 120px;
+        }
+
+        .demo-output p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: var(--accent-tertiary);
+            color: var(--accent-primary);
+            padding: 0.2rem 0.5rem;
+            font-weight: 600;
+        }
+
+        .demo-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-family: 'Crimson Pro', serif;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: var(--accent-secondary);
+        }
+
+        /* Problem Section */
+        .problem {
+            padding: 8rem 4rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .problem h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .problem-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 1rem;
+            color: var(--accent-tertiary);
+        }
+
+        .stat-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Narrative Section */
+        .narrative {
+            padding: 8rem 4rem;
+            background: var(--bg-primary);
+        }
+
+        .narrative-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .narrative h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--accent-primary);
+        }
+
+        .narrative p {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .narrative p:first-of-type::first-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            float: left;
+            margin-right: 0.5rem;
+            line-height: 1;
+            color: var(--accent-secondary);
+        }
+
+        /* Solution Section */
+        .solution {
+            padding: 8rem 4rem;
+            background: var(--bg-secondary);
+        }
+
+        .solution h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 5rem;
+            color: var(--accent-primary);
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .step-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent-tertiary);
+            margin-bottom: 1.5rem;
+        }
+
+        .step h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .step p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 8rem 4rem;
+            background: var(--bg-primary);
+        }
+
+        .benefits h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 5rem;
+            color: var(--accent-primary);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .benefit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .benefit-card:hover {
+            box-shadow: 0 10px 30px rgba(10, 22, 40, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .benefit-icon {
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .benefit-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .benefit-card p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 10rem 4rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .final-cta p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            font-style: italic;
+        }
+
+        .final-cta button {
+            padding: 1.25rem 3rem;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .final-cta button:hover {
+            background: var(--accent-tertiary);
+            transform: translateY(-2px);
+        }
+
+        .final-cta .note {
+            margin-top: 2rem;
+            font-size: 1rem;
+            opacity: 0.8;
+            font-style: normal;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 4rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 8rem 2rem 4rem;
+                gap: 4rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .steps-container {
+                grid-template-columns: 1fr;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">GEO Platform</div>
+        <button class="nav-cta">Get Started</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-eyebrow">The New Standard for Product Discovery</p>
+            <h1>Your Products Deserve to Be <em>Discovered</em> in the Age of AI</h1>
+            <p class="hero-pullquote">Traditional SEO is obsolete. AI-powered search is how customers find products today—and GEO is how you ensure you're found.</p>
+            <div class="hero-ctas">
+                <button class="cta-primary">Begin Your Journey</button>
+                <button class="cta-secondary">Read the Story</button>
+            </div>
+        </div>
+        <div class="hero-demo">
+            <div class="demo-frame">
+                <div class="demo-title">See GEO in Action</div>
+                <div class="demo-block">
+                    <div class="demo-label">Your Product</div>
+                    <input class="demo-field" value="Nike Air Zoom Pegasus 40" readonly>
+                </div>
+                <div class="demo-block">
+                    <div class="demo-label">Customer Query</div>
+                    <input class="demo-field" value="What are the best marathon running shoes under $150?" readonly>
+                </div>
+                <div class="demo-block">
+                    <div class="demo-label">AI Engines</div>
+                    <div class="demo-chips">
+                        <span class="demo-chip active">Gemini</span>
+                        <span class="demo-chip active">GPT-4o</span>
+                        <span class="demo-chip">Claude</span>
+                        <span class="demo-chip">Llama</span>
+                    </div>
+                </div>
+                <div class="demo-block">
+                    <div class="demo-label">AI Response</div>
+                    <div class="demo-output">
+                        <p>After analyzing performance and value, the top recommendations include...</p>
+                        <p>The <span class="highlight">Nike Air Zoom Pegasus 40</span> stands out for its responsive cushioning and durability.</p>
+                        <p style="color: var(--accent-primary); font-weight: 600; font-size: 0.9rem;">✓ Mentioned with positive sentiment</p>
+                    </div>
+                </div>
+                <button class="demo-button">Experience the Demo</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <h2>The Search Revolution Has Arrived</h2>
+        <p class="problem-subtitle">How customers discover products has fundamentally changed. The question is: will you adapt or be left behind?</p>
+        <div class="stats-container">
+            <div class="stat">
+                <div class="stat-value">63%</div>
+                <div class="stat-description">of searches now generate AI-powered responses instead of traditional links</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">150M+</div>
+                <div class="stat-description">people use AI chat platforms daily to research and discover products</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">87%</div>
+                <div class="stat-description">never click through to traditional search results when AI answers suffice</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Narrative Section -->
+    <section class="narrative">
+        <div class="narrative-content">
+            <h2>The GEO Imperative</h2>
+            <p>For two decades, SEO ruled product discovery. You optimized for keywords, built backlinks, and climbed Google's rankings. That era has ended. Today, Google SGE, Bing Chat, and Perplexity don't return lists of links—they synthesize answers from across the web.</p>
+            <p>If your products aren't mentioned in these AI-generated responses, they simply don't exist for millions of potential customers. Traditional SEO cannot solve this problem. You need Generative Engine Optimization—GEO.</p>
+            <p>GEO Platform enables you to test, track, and optimize how AI engines discover, describe, and recommend your products. It's the difference between invisibility and prominence in the new age of search.</p>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution">
+        <h2>The GEO Methodology</h2>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">I</div>
+                <h3>Catalog Your Products</h3>
+                <p>Add your products with descriptions, categories, and strategic keywords that AI engines should recognize.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">II</div>
+                <h3>Simulate Real Queries</h3>
+                <p>Create prompts that mirror how your customers actually ask questions and test against multiple AI models.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">III</div>
+                <h3>Analyze & Optimize</h3>
+                <p>See exactly where your products appear, understand sentiment, and refine your approach continuously.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits">
+        <h2>Why Leading Brands Choose GEO</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">🎯</div>
+                <h3>Precise Visibility</h3>
+                <p>Know exactly when and where your products appear in AI responses, with context and position tracking that reveals your true visibility.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">📊</div>
+                <h3>Sentiment Intelligence</h3>
+                <p>Understand not just if you're mentioned, but how—positive, neutral, or negative—so you can optimize product descriptions for better positioning.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">⚡</div>
+                <h3>Comprehensive Testing</h3>
+                <p>Test across Gemini, GPT-4o, Claude, Llama, and more simultaneously to ensure comprehensive AI search coverage.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">📈</div>
+                <h3>Continuous Intelligence</h3>
+                <p>Track your visibility trends over time, monitor competitive movements, and stay ahead as AI search evolves.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>The Future of Search Waits for No One</h2>
+        <p>Join the brands already optimizing for AI-powered discovery</p>
+        <button>Start Your Free GEO Journey</button>
+        <p class="note">No credit card required • Five complimentary analyses daily</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 GEO Platform. Pioneering Generative Engine Optimization.</p>
+    </footer>
+</body>
+</html>

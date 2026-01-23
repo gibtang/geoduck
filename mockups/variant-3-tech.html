@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEO Platform - Variant 3: Tech/Data Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #00ff41;
+            --accent-tertiary: #ff7b72;
+            --border-color: #30363d;
+            --glow-primary: rgba(0, 212, 255, 0.15);
+            --glow-secondary: rgba(0, 255, 65, 0.15);
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scanlines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03),
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .logo::before {
+            content: '> ';
+            color: var(--accent-secondary);
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .nav-cta {
+            padding: 0.5rem 1.5rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-cta:hover {
+            box-shadow: 0 0 20px var(--glow-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            padding: 6rem 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            background:
+                linear-gradient(90deg, transparent 49px, var(--border-color) 50px, transparent 51px),
+                linear-gradient(transparent 49px, var(--border-color) 50px, transparent 51px);
+            background-size: 50px 50px;
+            background-position: center center;
+        }
+
+        .hero-content {
+            padding: 2rem;
+        }
+
+        .hero-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--accent-secondary);
+            border-radius: 4px;
+        }
+
+        .hero h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero h1 .highlight {
+            color: var(--accent-primary);
+        }
+
+        .hero h1 .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 1.2em;
+            background: var(--accent-primary);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .hero-subtitle {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            max-width: 600px;
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cta-primary {
+            padding: 0.875rem 2rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cta-primary:hover {
+            box-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        .cta-secondary {
+            padding: 0.875rem 2rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cta-secondary:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        .hero-terminal {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .terminal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-button.close { background: var(--accent-tertiary); }
+        .terminal-button.minimize { background: #e3b341; }
+        .terminal-button.maximize { background: var(--accent-secondary); }
+
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-secondary);
+            margin-right: 0.5rem;
+        }
+
+        .terminal-command {
+            color: var(--text-primary);
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .terminal-output .success {
+            color: var(--accent-secondary);
+        }
+
+        .terminal-output .warning {
+            color: #e3b341;
+        }
+
+        .terminal-output .info {
+            color: var(--accent-primary);
+        }
+
+        .terminal-input-group {
+            margin-top: 1rem;
+        }
+
+        .terminal-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .terminal-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .terminal-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--glow-primary);
+        }
+
+        .terminal-models {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .terminal-model {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .terminal-model.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .terminal-model:hover:not(.active) {
+            border-color: var(--accent-secondary);
+        }
+
+        .terminal-button-cta {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent-secondary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .terminal-button-cta:hover {
+            box-shadow: 0 0 20px var(--glow-secondary);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .features-header h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .features-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--accent-primary);
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .feature-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .feature-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        /* Architecture Section */
+        .architecture {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .architecture-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .architecture-header h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .arch-diagram {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .arch-node {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .arch-node::after {
+            content: '→';
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            color: var(--accent-secondary);
+        }
+
+        .arch-node:last-child::after {
+            display: none;
+        }
+
+        .arch-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .arch-node h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .arch-node p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            padding: 1rem 3rem;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cta-button:hover {
+            box-shadow: 0 0 40px var(--glow-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        footer p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .hero-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-diagram {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-node::after {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">GEO Platform</div>
+        <div class="nav-status">
+            <div class="status-indicator"></div>
+            <button class="nav-cta">Initialize</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-tag">⚡ Generative Engine Optimization</span>
+            <h1>
+                Your products are <span class="highlight">invisible</span> to AI search<span class="cursor"></span>
+            </h1>
+            <p class="hero-subtitle">AI-powered search engines like Google SGE, Bing Chat, and Perplexity are how customers discover products today. Traditional SEO cannot solve this problem.</p>
+            <div class="hero-metrics">
+                <div class="metric">
+                    <div class="metric-value">63%</div>
+                    <div class="metric-label">AI Search Adoption</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">150M+</div>
+                    <div class="metric-label">Daily Users</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">7</div>
+                    <div class="metric-label">AI Models</div>
+                </div>
+            </div>
+            <div class="hero-ctas">
+                <button class="cta-primary">Start Optimizing</button>
+                <button class="cta-secondary">View Documentation</button>
+            </div>
+        </div>
+        <div class="hero-terminal">
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-buttons">
+                        <div class="terminal-button close"></div>
+                        <div class="terminal-button minimize"></div>
+                        <div class="terminal-button maximize"></div>
+                    </div>
+                    <div class="terminal-title">geo-cli — v1.0.0</div>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command">geo analyze --product "Nike Air Zoom Pegasus 40"</span>
+                    </div>
+                    <div class="terminal-line">
+                        <div class="terminal-output">
+                            <div>> Analyzing product visibility across AI models...</div>
+                            <div style="margin-top: 0.5rem;">> Models selected: <span class="info">Gemini Pro, GPT-4o</span></div>
+                            <div style="margin-top: 0.5rem;">> Test query: "Best marathon running shoes under $150"</div>
+                            <div style="margin-top: 0.5rem;">> <span class="success">✓ Product detected in response</span></div>
+                            <div style="margin-top: 0.5rem;">> <span class="success">✓ Sentiment: Positive</span></div>
+                            <div style="margin-top: 0.5rem;">> <span class="warning">⚠ Position: 3rd mention</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-buttons">
+                        <div class="terminal-button close"></div>
+                        <div class="terminal-button minimize"></div>
+                        <div class="terminal-button maximize"></div>
+                    </div>
+                    <div class="terminal-title">Live Demo</div>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-input-group">
+                        <div class="terminal-label">Product Name</div>
+                        <input class="terminal-input" value="Nike Air Zoom Pegasus 40" readonly>
+                    </div>
+                    <div class="terminal-input-group">
+                        <div class="terminal-label">Test Prompt</div>
+                        <input class="terminal-input" value="Best marathon running shoes under $150" readonly>
+                    </div>
+                    <div class="terminal-input-group">
+                        <div class="terminal-label">AI Models</div>
+                        <div class="terminal-models">
+                            <span class="terminal-model active">Gemini</span>
+                            <span class="terminal-model active">GPT-4o</span>
+                            <span class="terminal-model">Claude</span>
+                            <span class="terminal-model">Llama</span>
+                        </div>
+                    </div>
+                    <button class="terminal-button-cta">Execute Analysis</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-header">
+            <h2>System Capabilities</h2>
+            <p>Advanced GEO toolkit for AI-driven product discovery optimization</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Precision Detection</h3>
+                <p>Product mention detection with keyword matching, context extraction, and position tracking across all AI model responses.</p>
+                <div class="feature-meta">
+                    <span class="feature-tag">DETECTION</span>
+                    <span class="feature-tag">ANALYSIS</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Sentiment Analysis</h3>
+                <p>Natural language processing determines if product mentions are positive, neutral, or negative for quality assessment.</p>
+                <div class="feature-meta">
+                    <span class="feature-tag">NLP</span>
+                    <span class="feature-tag">INSIGHTS</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Multi-Model Execution</h3>
+                <p>Simultaneous testing across Gemini, GPT-4o, Claude, Llama, and more for comprehensive AI search coverage.</p>
+                <div class="feature-meta">
+                    <span class="feature-tag">PARALLEL</span>
+                    <span class="feature-tag">7 MODELS</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Continuous Tracking</h3>
+                <p>Historical analysis and trend monitoring to track visibility changes over time and stay competitive.</p>
+                <div class="feature-meta">
+                    <span class="feature-tag">MONITORING</span>
+                    <span class="feature-tag">ANALYTICS</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section class="architecture">
+        <div class="architecture-header">
+            <h2>Workflow Architecture</h2>
+        </div>
+        <div class="arch-diagram">
+            <div class="arch-node">
+                <div class="arch-icon">📦</div>
+                <h3>Input</h3>
+                <p>Import products with descriptions and keywords. Create test prompts simulating customer queries.</p>
+            </div>
+            <div class="arch-node">
+                <div class="arch-icon">⚙️</div>
+                <h3>Process</h3>
+                <p>Execute prompts against multiple AI models in parallel. Analyze responses for product mentions.</p>
+            </div>
+            <div class="arch-node">
+                <div class="arch-icon">📊</div>
+                <h3>Output</h3>
+                <p>View detection results, sentiment analysis, and position tracking with actionable insights.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">63%</div>
+                <div class="stat-label">of searches use AI responses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">87%</div>
+                <div class="stat-label">never click traditional results</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">150M+</div>
+                <div class="stat-label">daily AI chat users</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <h2>Ready to Optimize for AI Search?</h2>
+        <p>Join the platform that's pioneering Generative Engine Optimization. Start seeing results immediately.</p>
+        <button class="cta-button">Initialize GEO Platform</button>
+        <p style="margin-top: 1.5rem; font-size: 0.875rem; font-family: 'JetBrains Mono', monospace;">No credit card required • 5 free daily analyses • Full API access</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 GEO Platform | System Status: <span style="color: var(--accent-secondary);">● Operational</span></p>
+    </footer>
+</body>
+</html>

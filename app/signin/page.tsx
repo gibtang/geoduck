@@ -6,6 +6,7 @@ import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { trackLogin } from '@/lib/ganalytics';
+import GoogleSignIn from '@/components/GoogleSignIn';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -28,6 +29,10 @@ export default function SignInPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = () => {
+    trackLogin('google');
   };
 
   return (
@@ -81,6 +86,21 @@ export default function SignInPage() {
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <GoogleSignIn
+            mode="signin"
+            onSuccess={handleGoogleSuccess}
+            onError={setError}
+          />
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{' '}
