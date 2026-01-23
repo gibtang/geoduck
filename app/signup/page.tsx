@@ -15,6 +15,11 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  /**
+   * Handles email/password form submission
+   * Creates Firebase user, creates database record, tracks signup event, and redirects to dashboard
+   * @param e - Form submit event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -23,6 +28,7 @@ export default function SignUpPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
+      // Create user record in MongoDB after Firebase authentication
       const response = await fetch('/api/users/create', {
         method: 'POST',
         headers: {
@@ -35,13 +41,34 @@ export default function SignUpPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create user in database');
+        const errorData = await response.json().catch(() => ({}));
+
+        // CRITICAL: Delete Firebase user to avoid orphaned accounts
+        await userCredential.user.delete().catch(() => {
+          console.error('Failed to delete Firebase user after database error');
+        });
+
+        throw new Error(errorData.message || 'Failed to create user in database');
       }
 
       trackSignUp('email');
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+    } catch (err: unknown) {
+      // Type-safe error handling
+      const error = err as { code?: string; message?: string };
+
+      // Map Firebase errors to user-friendly messages
+      const errorMessage = error.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists. Please sign in.'
+        : error.code === 'auth/weak-password'
+        ? 'Password is too weak. Please use at least 6 characters.'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address format.'
+        : error.code === 'auth/too-many-requests'
+        ? 'Too many attempts. Please wait a few minutes before trying again.'
+        : error.message || 'Failed to create account';
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -18,6 +18,7 @@ interface Product {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -46,9 +47,18 @@ export default function ProductsPage() {
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
+        setError('');
+      } else {
+        const errorMessage = response.status === 401
+          ? 'Your session has expired. Please sign in again.'
+          : 'Failed to load products. Please refresh the page.';
+        setError(errorMessage);
+        setProducts([]);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Failed to load products. Please check your connection.');
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -75,9 +85,12 @@ export default function ProductsPage() {
           trackDeleteProduct(productToDelete.name, productToDelete.category);
         }
         setProducts(products.filter((p) => p._id !== id));
+      } else {
+        alert('Failed to delete product. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
+      alert('Failed to delete product. Please check your connection and try again.');
     }
   };
 
@@ -104,7 +117,13 @@ export default function ProductsPage() {
         </Link>
       </div>
 
-      {products.length === 0 ? (
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {products.length === 0 && !error ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"

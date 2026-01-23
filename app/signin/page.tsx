@@ -15,6 +15,11 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  /**
+   * Handles email/password form submission
+   * Authenticates user via Firebase, tracks login event, and redirects to dashboard
+   * @param e - Form submit event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -24,8 +29,22 @@ export default function SignInPage() {
       await signInWithEmailAndPassword(auth, email, password);
       trackLogin('email');
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+    } catch (err: unknown) {
+      // Type-safe error handling
+      const error = err as { code?: string; message?: string };
+
+      // Map Firebase errors to user-friendly messages
+      const errorMessage = error.code === 'auth/invalid-credential'
+        ? 'Invalid email or password. Please try again.'
+        : error.code === 'auth/user-not-found'
+        ? 'No account found with this email. Please sign up.'
+        : error.code === 'auth/wrong-password'
+        ? 'Incorrect password. Please try again.'
+        : error.code === 'auth/too-many-requests'
+        ? 'Too many failed attempts. Please wait a few minutes before trying again.'
+        : error.message || 'Failed to sign in';
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

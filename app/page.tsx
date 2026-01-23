@@ -17,14 +17,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="min-h-screen grid md:grid-cols-2 gap-8 md:gap-16 pt-32 pb-20 px-6 md:px-12 relative"
-        style={{
-          backgroundImage: `
-            linear-gradient(90deg, transparent 49px, #2a2a2a 50px, transparent 51px),
-            linear-gradient(transparent 49px, #2a2a2a 50px, transparent 51px)
-          `,
-          backgroundSize: '100px 100px'
-        }}
+      <section className="min-h-screen grid md:grid-cols-2 gap-8 md:gap-16 pt-32 pb-20 px-6 md:px-12 relative hero-grid-pattern"
       >
         {/* Radial gradient overlay */}
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-[radial-gradient(ellipse_at_top_right,rgba(0,212,255,0.1)_0%,transparent_50%)] pointer-events-none" />
@@ -219,8 +212,8 @@ export default function Home() {
       {/* Final CTA Section */}
       <section className="py-24 md:py-32 px-6 md:px-12 bg-[#141414] text-center relative overflow-hidden">
         {/* Decorative circles */}
-        <div className="absolute w-[400px] h-[400px] border-2 border-[#00d4ff] rounded-full top-[-200px] left-[-100px] opacity-20" />
-        <div className="absolute w-[300px] h-[300px] border-2 border-[#ff6b6b] rounded-full bottom-[-150px] right-[-50px] opacity-20" />
+        <div className="absolute w-[400px] h-[400px] border-2 border-[#00d4ff] rounded-full top-[-200px] left-[-100px] opacity-20" aria-hidden="true" />
+        <div className="absolute w-[300px] h-[300px] border-2 border-[#ff6b6b] rounded-full bottom-[-150px] right-[-50px] opacity-20" aria-hidden="true" />
 
         <h2 className="font-bricolage font-800 text-4xl md:text-6xl lg:text-7xl mb-8 leading-[1.1] relative z-10">
           DON'T GET LEFT BEHIND<br />

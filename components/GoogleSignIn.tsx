@@ -5,6 +5,20 @@ import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Google Sign-In button component that handles both sign-in and sign-up flows
+ *
+ * @param mode - Whether this is for sign-in or sign-up ('signin' | 'signup')
+ * @param onSuccess - Optional callback invoked after successful authentication (called BEFORE navigation)
+ * @param onError - Optional callback for error handling, receives error message string
+ *
+ * @example
+ * <GoogleSignIn
+ *   mode="signup"
+ *   onSuccess={() => router.push('/dashboard')}
+ *   onError={(msg) => setError(msg)}
+ * />
+ */
 interface GoogleSignInProps {
   mode: 'signin' | 'signup';
   onSuccess?: () => void;
@@ -22,7 +36,9 @@ export default function GoogleSignIn({ mode, onSuccess, onError }: GoogleSignInP
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
 
-      // For signup, create user in database
+      // For signup mode, create user record in MongoDB after Firebase authentication
+      // This ensures the user exists in our database before redirecting to dashboard
+      // The API endpoint is idempotent - it returns existing user if firebaseUid already exists
       if (mode === 'signup') {
         const response = await fetch('/api/users/create', {
           method: 'POST',
@@ -36,20 +52,43 @@ export default function GoogleSignIn({ mode, onSuccess, onError }: GoogleSignInP
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create user in database');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to create user in database');
         }
       }
 
+      // Call success callback FIRST (for analytics tracking) before navigation
       onSuccess?.();
+
+      // Only navigate on success - do NOT navigate in catch block
       router.push('/dashboard');
-    } catch (err: any) {
-      console.error('Google sign-in error:', err);
-      const errorMessage = err.code === 'auth/popup-closed-by-user'
+    } catch (err: unknown) {
+      // Type-safe error handling with Firebase error codes
+      const error = err as { code?: string; message?: string };
+
+      // Map Firebase auth errors to user-friendly messages
+      // See: https://firebase.google.com/docs/auth/admin/errors
+      const errorMessage = error.code === 'auth/popup-closed-by-user'
         ? 'Sign-in popup was closed'
-        : err.code === 'auth/popup-blocked'
+        : error.code === 'auth/popup-blocked'
         ? 'Sign-in popup was blocked. Please allow popups for this site.'
-        : err.message || 'Failed to sign in with Google';
-      onError?.(errorMessage);
+        : error.code === 'auth/account-exists-with-different-credential'
+        ? 'An account already exists with the same email address but different sign-in credentials'
+        : error.code === 'auth/invalid-credential'
+        ? 'Invalid credentials. Please try again.'
+        : error.message || 'Failed to sign in with Google';
+
+      console.error('Google sign-in error:', errorMessage, error);
+
+      // Ensure error handler is called
+      if (onError) {
+        onError(errorMessage);
+      } else {
+        // Fallback if no error handler provided
+        console.error('No error handler provided for GoogleSignIn:', errorMessage);
+      }
+
+      // CRITICAL: Do NOT navigate on error - user should see error message and retry
     } finally {
       setLoading(false);
     }
