@@ -1,7 +1,7 @@
 'use client';
 
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { getApp } from 'firebase/app';
 
 /**
  * Initializes Firebase auth state listener and manages token persistence
@@ -14,6 +14,8 @@ import { auth } from './firebase';
 export function initializeAuthListener() {
   if (typeof window === 'undefined') return;
 
+  // Get auth instance only on client side to avoid SSR issues
+  const auth = getAuth(getApp());
   let tokenRefreshInterval: NodeJS.Timeout | null = null;
 
   onAuthStateChanged(auth, async (user) => {
