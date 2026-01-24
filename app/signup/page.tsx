@@ -51,6 +51,10 @@ export default function SignUpPage() {
         throw new Error(errorData.message || 'Failed to create user in database');
       }
 
+      // Get Firebase ID token and set it as a cookie for middleware authentication
+      const idToken = await userCredential.user.getIdToken();
+      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+
       trackSignUp('email');
       router.push('/dashboard');
     } catch (err: unknown) {

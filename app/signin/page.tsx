@@ -26,7 +26,12 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Get Firebase ID token and set it as a cookie for middleware authentication
+      const idToken = await userCredential.user.getIdToken();
+      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+
       trackLogin('email');
       router.push('/dashboard');
     } catch (err: unknown) {

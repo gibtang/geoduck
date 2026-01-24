@@ -12,7 +12,8 @@
       "Bash(vercel ls:*)",
       "Bash(mkdir:*)",
       "Bash(gh pr view:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

@@ -13,6 +13,8 @@ export default function Header() {
     try {
       trackLogout();
       await signOut(auth);
+      // Clear the Firebase auth token cookie
+      document.cookie = 'firebase-auth-token=; path=/; max-age=0';
       window.location.href = '/signin';
     } catch (error) {
       console.error('Error signing out:', error);

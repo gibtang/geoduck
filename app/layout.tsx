@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import AuthProvider from "@/components/AuthProvider";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${bricolage.variable} ${ibmPlex.variable} antialiased`}
       >
+        <AuthProvider />
         <GoogleAnalytics />
         {children}
       </body>

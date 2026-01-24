@@ -57,6 +57,10 @@ export default function GoogleSignIn({ mode, onSuccess, onError }: GoogleSignInP
         }
       }
 
+      // Get Firebase ID token and set it as a cookie for middleware authentication
+      const idToken = await userCredential.user.getIdToken();
+      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+
       // Call success callback FIRST (for analytics tracking) before navigation
       onSuccess?.();
 
