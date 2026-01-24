@@ -41,7 +41,10 @@ function validateEnv() {
 }
 
 // Validate on import (fail fast)
-validateEnv();
+// Only validate on client side to avoid SSR issues
+if (typeof window !== 'undefined') {
+  validateEnv();
+}
 
 // Export validated environment variables
 export const env = envSchema as {

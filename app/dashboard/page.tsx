@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { auth } from '@/lib/firebase';
 
 export default function DashboardPage() {
   return (
