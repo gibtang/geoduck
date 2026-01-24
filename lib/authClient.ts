@@ -1,7 +1,12 @@
 'use client';
 
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
-import { getApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { env } from './env';
+
+// Store the interval ID outside the listener to prevent multiple intervals
+let tokenRefreshInterval: NodeJS.Timeout | null = null;
+let isInitialized = false;
 
 /**
  * Initializes Firebase auth state listener and manages token persistence
@@ -14,9 +19,22 @@ import { getApp } from 'firebase/app';
 export function initializeAuthListener() {
   if (typeof window === 'undefined') return;
 
-  // Get auth instance only on client side to avoid SSR issues
-  const auth = getAuth(getApp());
-  let tokenRefreshInterval: NodeJS.Timeout | null = null;
+  // Prevent multiple listeners
+  if (isInitialized) return;
+  isInitialized = true;
+
+  // Ensure Firebase app is initialized
+  const app = getApps().length === 0 ? initializeApp({
+    apiKey: env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  }) : getApp();
+
+  const auth = getAuth(app);
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -25,11 +43,12 @@ export function initializeAuthListener() {
         const idToken = await user.getIdToken();
         document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
 
-        // Set up token refresh every 55 minutes (tokens expire in 1 hour)
+        // Clear any existing interval before setting a new one
         if (tokenRefreshInterval) {
           clearInterval(tokenRefreshInterval);
         }
 
+        // Set up token refresh every 55 minutes (tokens expire in 1 hour)
         tokenRefreshInterval = setInterval(async () => {
           try {
             const refreshedUser = auth.currentUser;
