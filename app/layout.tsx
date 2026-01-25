@@ -4,6 +4,7 @@ import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { AuthProvider } from "@/components/AuthContext";
 import { createBaseMetadata } from "@/lib/metadata";
+import { OrganizationSchema, WebApplicationSchema, WebSiteSchema } from "@/components/StructuredData";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -28,6 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <OrganizationSchema />
+        <WebApplicationSchema />
+        <WebSiteSchema />
+      </head>
       <body
         className={`${bricolage.variable} ${ibmPlex.variable} antialiased`}
       >
