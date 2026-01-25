@@ -126,7 +126,7 @@ export default function ProductsPage() {
       {products.length === 0 && !error ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-500"
+            className="mx-auto h-12 w-12 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

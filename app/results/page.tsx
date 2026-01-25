@@ -107,7 +107,7 @@ export default function ResultsPage() {
       {results.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-500"
+            className="mx-auto h-12 w-12 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -159,7 +159,7 @@ export default function ResultsPage() {
                       <p className="text-xs text-gray-700">Mentioned</p>
                     </div>
                     <svg
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                      className={`w-5 h-5 text-gray-700 transition-transform ${
                         expandedResult === result._id ? 'transform rotate-180' : ''
                       }`}
                       fill="none"
