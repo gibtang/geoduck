@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { getDashboardMetadata } from '@/lib/metadata';
+
+export const metadata = getDashboardMetadata();
 
 export default function DashboardPage() {
   return (

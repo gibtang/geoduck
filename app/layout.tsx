@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { AuthProvider } from "@/components/AuthContext";
+import { createBaseMetadata } from "@/lib/metadata";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -18,10 +19,7 @@ const ibmPlex = IBM_Plex_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "GEO Platform - Generative Engine Optimization",
-  description: "Optimize your e-commerce products for AI-powered search engines",
-};
+export const metadata: Metadata = createBaseMetadata();
 
 export default function RootLayout({
   children,

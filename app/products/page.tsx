@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { trackDeleteProduct } from '@/lib/ganalytics';
 import { useAuth } from '@/components/AuthContext';
+import ProductEditModal from '@/components/ProductEditModal';
 
 interface Product {
   _id: string;
@@ -15,6 +16,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -89,6 +91,44 @@ export default function ProductsPage() {
     }
   };
 
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+  };
+
+  const closeEditModal = () => {
+    setEditingProduct(null);
+  };
+
+  const handleSaveEdit = async (data: { name: string; description: string }) => {
+    if (!user || !editingProduct) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/products/${editingProduct._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-firebase-uid': user.uid,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        // Optimistic update
+        setProducts(products.map(p =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        ));
+      } else {
+        throw new Error('Failed to save product');
+      }
+    } catch (error) {
+      console.error('Error saving product:', error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -153,19 +193,31 @@ export default function ProductsPage() {
               key={product._id}
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+              <h3
+                className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                onDoubleClick={() => openEditModal(product)}
+                title="Double-click to edit"
+              >
+                {product.name}
+              </h3>
 
               {product.description && (
-                <p className="text-sm text-gray-800 mb-4 line-clamp-2">{product.description}</p>
+                <p
+                  className="text-sm text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                  onDoubleClick={() => openEditModal(product)}
+                  title="Double-click to edit"
+                >
+                  {product.description}
+                </p>
               )}
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <Link
-                  href={`/products/${product._id}/edit`}
+                <button
+                  onClick={() => openEditModal(product)}
                   className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   Edit
-                </Link>
+                </button>
                 <button
                   onClick={() => handleDelete(product._id)}
                   className="text-red-700 hover:text-red-800 text-sm font-medium"
@@ -176,6 +228,16 @@ export default function ProductsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {editingProduct && (
+        <ProductEditModal
+          key={editingProduct._id}
+          product={editingProduct}
+          isOpen={!!editingProduct}
+          onClose={closeEditModal}
+          onSave={handleSaveEdit}
+        />
       )}
     </div>
   );
