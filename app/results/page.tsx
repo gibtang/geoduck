@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
+import { useAuth } from '@/components/AuthContext';
 
 interface ProductMention {
   product: {
@@ -30,28 +29,25 @@ interface Result {
 export default function ResultsPage() {
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchResults(user);
-      } else {
-        setLoading(false);
-      }
-    });
+    if (user) {
+      fetchResults();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchResults = async () => {
+    if (!user) return;
 
-  const fetchResults = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/results', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });

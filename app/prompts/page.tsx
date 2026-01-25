@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 interface Prompt {
   _id: string;
@@ -17,27 +16,24 @@ interface Prompt {
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchPrompts(user);
-      } else {
-        setLoading(false);
-      }
-    });
+    if (user) {
+      fetchPrompts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchPrompts = async () => {
+    if (!user) return;
 
-  const fetchPrompts = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/prompts', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -54,6 +50,8 @@ export default function PromptsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
+
     const promptToDelete = prompts.find(p => p._id === id);
     if (!confirm('Are you sure you want to delete this prompt?')) {
       return;

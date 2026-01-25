@@ -8,14 +8,17 @@ import { useRouter } from 'next/navigation';
 /**
  * Google Sign-In button component that handles both sign-in and sign-up flows
  *
+ * IMPORTANT: This component does NOT navigate after sign-in.
+ * Navigation is handled by the signin/signup pages watching AuthContext's user state.
+ *
  * @param mode - Whether this is for sign-in or sign-up ('signin' | 'signup')
- * @param onSuccess - Optional callback invoked after successful authentication (called BEFORE navigation)
+ * @param onSuccess - Optional callback invoked after successful authentication
  * @param onError - Optional callback for error handling, receives error message string
  *
  * @example
  * <GoogleSignIn
  *   mode="signup"
- *   onSuccess={() => router.push('/dashboard')}
+ *   onSuccess={() => console.log('Signed in!')}
  *   onError={(msg) => setError(msg)}
  * />
  */
@@ -57,15 +60,12 @@ export default function GoogleSignIn({ mode, onSuccess, onError }: GoogleSignInP
         }
       }
 
-      // Get Firebase ID token and set it as a cookie for middleware authentication
-      const idToken = await userCredential.user.getIdToken();
-      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+      // Note: Cookie is set by AuthContext's onAuthStateChanged listener
+      // Don't set cookie here to avoid duplication and timing issues
 
-      // Call success callback FIRST (for analytics tracking) before navigation
+      // Call success callback (for analytics tracking)
+      // Note: No navigation here - let AuthContext's user state change trigger navigation
       onSuccess?.();
-
-      // Only navigate on success - do NOT navigate in catch block
-      router.push('/dashboard');
     } catch (err: unknown) {
       // Type-safe error handling with Firebase error codes
       const error = err as { code?: string; message?: string };

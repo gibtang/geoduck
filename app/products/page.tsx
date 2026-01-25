@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { trackDeleteProduct } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 interface Product {
   _id: string;
@@ -19,27 +18,24 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchProducts(user);
-      } else {
-        setLoading(false);
-      }
-    });
+    if (user) {
+      fetchProducts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchProducts = async () => {
+    if (!user) return;
 
-  const fetchProducts = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/products', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -65,6 +61,8 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
+
     const productToDelete = products.find(p => p._id === id);
     if (!confirm('Are you sure you want to delete this product?')) {
       return;

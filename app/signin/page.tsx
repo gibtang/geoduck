@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { trackLogin } from '@/lib/ganalytics';
 import GoogleSignIn from '@/components/GoogleSignIn';
+import { useAuth } from '@/components/AuthContext';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,23 @@ export default function SignInPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
+  // Auto-redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   /**
    * Handles email/password form submission
@@ -26,14 +44,9 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
-      // Get Firebase ID token and set it as a cookie for middleware authentication
-      const idToken = await userCredential.user.getIdToken();
-      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-
+      await signInWithEmailAndPassword(auth, email, password);
+      // Note: Cookie is set by AuthContext, navigation is handled by useEffect above
       trackLogin('email');
-      router.push('/dashboard');
     } catch (err: unknown) {
       // Type-safe error handling
       const error = err as { code?: string; message?: string };

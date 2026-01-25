@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
 import { trackExecutePrompt, trackProductMentioned } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 interface Prompt {
   _id: string;
@@ -36,27 +35,24 @@ export default function ExecutePage() {
   const [compareModels, setCompareModels] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ExecutionResult[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [useCustomPrompt, setUseCustomPrompt] = useState(false);
   const [executing, setExecuting] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchPrompts(user);
-      }
-    });
+    if (user) {
+      fetchPrompts();
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchPrompts = async () => {
+    if (!user) return;
 
-  const fetchPrompts = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/prompts', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });

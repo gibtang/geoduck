@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { trackCreateProduct } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 export default function NewProductPage() {
   const [formData, setFormData] = useState({
@@ -15,20 +14,22 @@ export default function NewProductPage() {
     keywords: '',
   });
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push('/signin');
-      } else {
-        setUser(user);
-      }
-    });
+    if (!authLoading && !user) {
+      router.push('/signin');
+    }
+  }, [authLoading, user, router]);
 
-    return () => unsubscribe();
-  }, [router]);
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

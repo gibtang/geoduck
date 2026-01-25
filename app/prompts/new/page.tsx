@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { trackCreatePrompt } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 export default function NewPromptPage() {
   const [formData, setFormData] = useState({
@@ -13,20 +12,10 @@ export default function NewPromptPage() {
     category: '',
   });
   const [loading, setLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setAuthLoading(false); // Set loading false AFTER auth check completes
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  // Only redirect after auth loading completes
+  // Redirect to signin if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/signin');
