@@ -6,6 +6,7 @@ import { trackDeletePrompt } from '@/lib/ganalytics';
 import { useAuth } from '@/components/AuthContext';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
 import PromptEditModal from '@/components/PromptEditModal';
+import QuickTestModal from '@/components/QuickTestModal';
 
 interface Prompt {
   _id: string;
@@ -51,6 +52,9 @@ export default function PromptsPage() {
 
   // Inline editing state
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+
+  // Quick Test modal state
+  const [showQuickTest, setShowQuickTest] = useState(false);
 
   // Load last selected model and execution history from localStorage
   useEffect(() => {
@@ -190,6 +194,74 @@ export default function PromptsPage() {
       console.error('Error saving prompt:', error);
       throw error;
     }
+  };
+
+  const handleQuickTestExecute = async (promptContent: string, model: string, compareModels: string[]) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const token = await user.getIdToken();
+    const allModels = [model, ...compareModels];
+
+    // Execute models in parallel with staggered rate limiting
+    const executeModel = async (modelId: string, index: number) => {
+      // Add staggered delay to avoid rate limiting (500ms between each request)
+      if (index > 0) {
+        await new Promise(resolve => setTimeout(resolve, index * 500));
+      }
+
+      const response = await fetch('/api/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-firebase-uid': user.uid,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          promptId: null,
+          promptContent: promptContent,
+          model: modelId,
+          compareModels: [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to execute model ${modelId}`);
+      }
+
+      const data = await response.json();
+      return data.results;
+    };
+
+    // Execute all models in parallel (with staggered delays inside executeModel)
+    const resultsArray = await Promise.all(
+      allModels.map((modelId, index) => executeModel(modelId, index))
+    );
+
+    // Flatten and return results
+    return resultsArray.flat();
+  };
+
+  const handleSaveAsPrompt = async (title: string, content: string) => {
+    if (!user) throw new Error('User not authenticated');
+
+    const token = await user.getIdToken();
+    const response = await fetch('/api/prompts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-firebase-uid': user.uid,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title, content }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create prompt');
+    }
+
+    const newPrompt = await response.json();
+    // Add to prompts list
+    setPrompts(prev => [newPrompt, ...prev]);
   };
 
   const toggleExpand = (promptId: string) => {
@@ -332,12 +404,20 @@ export default function PromptsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Prompts</h1>
           <p className="mt-2 text-gray-800">Create and manage test prompts</p>
         </div>
-        <Link
-          href="/prompts/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Create Prompt
-        </Link>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowQuickTest(true)}
+            className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+          >
+            Quick Test
+          </button>
+          <Link
+            href="/prompts/new"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Create Prompt
+          </Link>
+        </div>
       </div>
 
       {prompts.length === 0 ? (
@@ -577,6 +657,16 @@ export default function PromptsPage() {
           isOpen={!!editingPrompt}
           onClose={closeEditModal}
           onSave={handleSaveEdit}
+        />
+      )}
+
+      {showQuickTest && (
+        <QuickTestModal
+          isOpen={showQuickTest}
+          onClose={() => setShowQuickTest(false)}
+          onExecute={handleQuickTestExecute}
+          onSaveAsPrompt={handleSaveAsPrompt}
+          lastSelectedModel={lastSelectedModel}
         />
       )}
     </div>

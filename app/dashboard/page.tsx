@@ -10,7 +10,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
         <Link href="/products">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -58,33 +58,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Prompts</h3>
             <p className="text-sm text-gray-800">
-              2. Create and manage test prompts
-            </p>
-          </div>
-        </Link>
-
-        <Link href="/execute">
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Execute</h3>
-            <p className="text-sm text-gray-800">
-              3. Run prompts against LLMs
+              2. Create, test, and execute prompts
             </p>
           </div>
         </Link>
@@ -110,7 +84,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Results</h3>
             <p className="text-sm text-gray-800">
-              4. View results and analysis
+              3. View results and analysis
             </p>
           </div>
         </Link>
@@ -120,7 +94,7 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
           <li>Add your products to the catalog</li>
-          <li>Create prompts that simulate user queries</li>
+          <li>Create prompts that simulate user queries, or use Quick Test for ad-hoc testing</li>
           <li>Execute prompts against different LLMs</li>
           <li>Review results to see if your products are mentioned</li>
         </ol>

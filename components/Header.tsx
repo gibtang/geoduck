@@ -25,7 +25,6 @@ export default function Header() {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/products', label: 'Products' },
     { href: '/prompts', label: 'Prompts' },
-    { href: '/execute', label: 'Execute Prompt' },
     { href: '/results', label: 'Results' },
   ];
 
