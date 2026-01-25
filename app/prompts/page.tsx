@@ -9,7 +9,6 @@ interface Prompt {
   _id: string;
   title: string;
   content: string;
-  category: string;
   createdAt: string;
 }
 
@@ -69,7 +68,7 @@ export default function PromptsPage() {
 
       if (response.ok) {
         if (promptToDelete) {
-          trackDeletePrompt(promptToDelete.title, promptToDelete.category);
+          trackDeletePrompt(promptToDelete.title);
         }
         setPrompts(prompts.filter((p) => p._id !== id));
       }
@@ -137,12 +136,7 @@ export default function PromptsPage() {
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
               <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{prompt.title}</h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mt-2">
-                    {prompt.category}
-                  </span>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900">{prompt.title}</h3>
               </div>
 
               <p className="text-sm text-gray-800 mb-4 line-clamp-3">{prompt.content}</p>

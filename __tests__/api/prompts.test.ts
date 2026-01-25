@@ -32,14 +32,12 @@ describe('Prompts API', () => {
       await Prompt.create({
         title: 'Prompt 1',
         content: 'Content 1',
-        category: 'Category 1',
         user: userId,
       });
 
       await Prompt.create({
         title: 'Prompt 2',
         content: 'Content 2',
-        category: 'Category 2',
         user: userId,
       });
 
@@ -102,7 +100,6 @@ describe('Prompts API', () => {
       const promptData = {
         title: 'New Prompt',
         content: 'What are the best products?',
-        category: 'Product Discovery',
       };
 
       const request = createRequest({
@@ -122,7 +119,6 @@ describe('Prompts API', () => {
       expect(response._getStatusCode()).toBe(201);
       expect(data.title).toBe(promptData.title);
       expect(data.content).toBe(promptData.content);
-      expect(data.category).toBe(promptData.category);
     });
 
     it('should return 400 with missing required fields', async () => {
@@ -152,7 +148,6 @@ describe('Prompts API', () => {
       const promptData = {
         title: 'New Prompt',
         content: 'Content',
-        category: 'Category',
       };
 
       const request = createRequest({

@@ -9,7 +9,6 @@ export default function NewPromptPage() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: '',
   });
   const [loading, setLoading] = useState(false);
   const { user, loading: authLoading } = useAuth();
@@ -41,7 +40,7 @@ export default function NewPromptPage() {
       });
 
       if (response.ok) {
-        trackCreatePrompt(formData.title, formData.category);
+        trackCreatePrompt(formData.title);
         router.push('/prompts');
       }
     } catch (error) {
@@ -88,22 +87,6 @@ export default function NewPromptPage() {
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="e.g., Top Toys for Christmas"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Category *
-          </label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            required
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="e.g., Product Discovery"
           />
         </div>
 
