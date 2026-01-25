@@ -164,15 +164,21 @@ export default function EditPromptPage() {
             id="content"
             name="content"
             required
+            maxLength={512}
             value={formData.content}
             onChange={handleChange}
             rows={8}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="What are the top toys to buy this holiday season? Include specific brands and features."
           />
-          <p className="mt-1 text-sm text-gray-700">
-            Write your prompt as if you were a customer searching for products
-          </p>
+          <div className="mt-1 flex justify-between items-center">
+            <p className="text-sm text-gray-700">
+              Write your prompt as if you were a customer searching for products
+            </p>
+            <p className="text-sm text-gray-600">
+              {formData.content.length}/512
+            </p>
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 pt-4">

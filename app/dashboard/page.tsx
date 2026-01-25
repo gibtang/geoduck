@@ -32,7 +32,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Products</h3>
             <p className="text-sm text-gray-800">
-              Manage your product catalog
+              1. Manage your product catalog
             </p>
           </div>
         </Link>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Prompts</h3>
             <p className="text-sm text-gray-800">
-              Create and manage test prompts
+              2. Create and manage test prompts
             </p>
           </div>
         </Link>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Execute</h3>
             <p className="text-sm text-gray-800">
-              Run prompts against LLMs
+              3. Run prompts against LLMs
             </p>
           </div>
         </Link>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Results</h3>
             <p className="text-sm text-gray-800">
-              View past results and analysis
+              4. View results and analysis
             </p>
           </div>
         </Link>
