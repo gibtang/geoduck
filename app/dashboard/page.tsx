@@ -5,7 +5,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome to GEO Platform</h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-gray-800">
           Optimize your products for AI-powered search engines
         </p>
       </div>
@@ -31,7 +31,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Products</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               Manage your product catalog
             </p>
           </div>
@@ -57,7 +57,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Prompts</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               Create and manage test prompts
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Execute</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               Run prompts against LLMs
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Results</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               View past results and analysis
             </p>
           </div>

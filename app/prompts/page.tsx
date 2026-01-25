@@ -93,7 +93,7 @@ export default function PromptsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Prompts</h1>
-          <p className="mt-2 text-gray-600">Create and manage test prompts</p>
+          <p className="mt-2 text-gray-800">Create and manage test prompts</p>
         </div>
         <Link
           href="/prompts/new"
@@ -106,7 +106,7 @@ export default function PromptsPage() {
       {prompts.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -119,7 +119,7 @@ export default function PromptsPage() {
             />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No prompts</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Get started by creating your first test prompt.
           </p>
           <div className="mt-6">
@@ -147,7 +147,7 @@ export default function PromptsPage() {
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3">{prompt.content}</p>
+              <p className="text-sm text-gray-800 mb-4 line-clamp-3">{prompt.content}</p>
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <Link
@@ -158,7 +158,7 @@ export default function PromptsPage() {
                 </Link>
                 <button
                   onClick={() => handleDelete(prompt._id)}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  className="text-red-700 hover:text-red-800 text-sm font-medium"
                 >
                   Delete
                 </button>

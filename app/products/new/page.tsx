@@ -81,7 +81,7 @@ export default function NewProductPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Add New Product</h1>
-        <p className="mt-2 text-gray-600">Add a product to your catalog</p>
+        <p className="mt-2 text-gray-800">Add a product to your catalog</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
@@ -138,7 +138,7 @@ export default function NewProductPage() {
             Price *
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500">$</span>
+            <span className="absolute left-3 top-2 text-gray-700">$</span>
             <input
               type="number"
               id="price"
@@ -167,7 +167,7 @@ export default function NewProductPage() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="e.g., wireless, bluetooth, noise-cancelling"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Separate keywords with commas
           </p>
         </div>

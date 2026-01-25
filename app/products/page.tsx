@@ -107,7 +107,7 @@ export default function ProductsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="mt-2 text-gray-600">Manage your product catalog</p>
+          <p className="mt-2 text-gray-800">Manage your product catalog</p>
         </div>
         <Link
           href="/products/new"
@@ -119,14 +119,14 @@ export default function ProductsPage() {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {products.length === 0 && !error ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -139,7 +139,7 @@ export default function ProductsPage() {
             />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No products</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Get started by adding your first product.
           </p>
           <div className="mt-6">
@@ -161,12 +161,12 @@ export default function ProductsPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-500">{product.category}</p>
+                  <p className="text-sm text-gray-700">{product.category}</p>
                 </div>
                 <p className="text-lg font-bold text-indigo-600">${product.price}</p>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+              <p className="text-sm text-gray-800 mb-4 line-clamp-2">{product.description}</p>
 
               {product.keywords.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -190,7 +190,7 @@ export default function ProductsPage() {
                 </Link>
                 <button
                   onClick={() => handleDelete(product._id)}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  className="text-red-700 hover:text-red-800 text-sm font-medium"
                 >
                   Delete
                 </button>

@@ -157,7 +157,7 @@ export default function ExecutePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Execute Prompt</h1>
-        <p className="mt-2 text-gray-600">Run prompts against LLMs to test product visibility</p>
+        <p className="mt-2 text-gray-800">Run prompts against LLMs to test product visibility</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -272,7 +272,7 @@ export default function ExecutePage() {
           {results.length === 0 ? (
             <div className="bg-white shadow-md rounded-lg p-12 text-center border border-gray-200">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -285,7 +285,7 @@ export default function ExecutePage() {
                 />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No results yet</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-700">
                 Configure your prompt and model, then execute to see results.
               </p>
             </div>
@@ -298,7 +298,7 @@ export default function ExecutePage() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       {AVAILABLE_MODELS.find(m => m.id === result.model)?.name || result.model}
                     </h3>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-700">
                       {new Date(result.createdAt).toLocaleString()}
                     </span>
                   </div>
@@ -321,10 +321,10 @@ export default function ExecutePage() {
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <p className="font-medium text-gray-900">{mention.productName}</p>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-700 mt-1">
                                   Position: {mention.position}
                                 </p>
-                                <p className="text-xs text-gray-600 mt-1 italic">
+                                <p className="text-xs text-gray-800 mt-1 italic">
                                   "{mention.context}"
                                 </p>
                               </div>

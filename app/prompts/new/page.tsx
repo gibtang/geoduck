@@ -82,7 +82,7 @@ export default function NewPromptPage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Create New Prompt</h1>
-        <p className="mt-2 text-gray-600">Create a test prompt for GEO analysis</p>
+        <p className="mt-2 text-gray-800">Create a test prompt for GEO analysis</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
@@ -132,7 +132,7 @@ export default function NewPromptPage() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="What are the top toys to buy this holiday season? Include specific brands and features."
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Write your prompt as if you were a customer searching for products
           </p>
         </div>

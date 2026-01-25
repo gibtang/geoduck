@@ -67,7 +67,7 @@ export default function SignInPage() {
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
@@ -116,7 +116,7 @@ export default function SignInPage() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+              <span className="px-4 bg-white text-gray-700">Or continue with</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export default function SignInPage() {
             onError={setError}
           />
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-gray-800">
             Don't have an account?{' '}
             <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
               Sign Up
