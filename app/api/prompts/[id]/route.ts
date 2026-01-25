@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const { title, content, category } = data;
+    const { title, content } = data;
     const { id } = await params;
 
     const prompt = await Prompt.findOneAndUpdate(
@@ -89,7 +89,6 @@ export async function PUT(
       {
         title,
         content,
-        category,
       },
       { new: true, runValidators: true }
     );
