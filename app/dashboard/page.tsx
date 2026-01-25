@@ -31,9 +31,29 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Products</h3>
-            <p className="text-sm text-gray-800">
-              1. Manage your product catalog
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-gray-800">
+                1. Manage your product catalog
+              </p>
+              <div className="relative group">
+                <svg
+                  className="w-4 h-4 text-gray-400 cursor-help"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  This will be used to see the products that are mentioned in the AI response
+                </div>
+              </div>
+            </div>
           </div>
         </Link>
 
