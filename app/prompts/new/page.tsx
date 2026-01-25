@@ -13,20 +13,25 @@ export default function NewPromptPage() {
     category: '',
   });
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push('/signin');
-      } else {
-        setUser(user);
-      }
+      setUser(user);
+      setAuthLoading(false); // Set loading false AFTER auth check completes
     });
 
     return () => unsubscribe();
   }, [router]);
+
+  // Only redirect after auth loading completes
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/signin');
+    }
+  }, [authLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +68,15 @@ export default function NewPromptPage() {
       [e.target.name]: e.target.value,
     });
   };
+
+  // Show loading spinner while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
