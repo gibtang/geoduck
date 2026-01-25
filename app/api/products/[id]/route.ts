@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const { name, description, category, price, keywords } = data;
+    const { name, description } = data;
     const { id } = await params;
 
     const product = await Product.findOneAndUpdate(
@@ -88,10 +88,7 @@ export async function PUT(
       },
       {
         name,
-        description,
-        category,
-        price,
-        keywords: keywords || [],
+        description: description || '',
       },
       { new: true, runValidators: true }
     );
