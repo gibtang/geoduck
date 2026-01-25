@@ -224,11 +224,15 @@ export default function PromptsPage() {
 
       const comparisonModels = selectedModels[promptId] || [];
       const allModels = [lastSelectedModel, ...comparisonModels];
-      const allResults: ExecutionResult[] = [];
 
-      // Execute each model sequentially
-      for (const modelId of allModels) {
-        // Update current executing model
+      // Execute models in parallel with staggered rate limiting
+      const executeModel = async (modelId: string, index: number) => {
+        // Add staggered delay to avoid rate limiting (500ms between each request)
+        if (index > 0) {
+          await new Promise(resolve => setTimeout(resolve, index * 500));
+        }
+
+        // Update current executing model for UI feedback
         setCurrentExecutingModel(prev => ({ ...prev, [promptId]: modelId }));
 
         const response = await fetch('/api/execute', {
@@ -245,11 +249,21 @@ export default function PromptsPage() {
           }),
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          allResults.push(...data.results);
+        if (!response.ok) {
+          throw new Error(`Failed to execute model ${modelId}`);
         }
-      }
+
+        const data = await response.json();
+        return data.results;
+      };
+
+      // Execute all models in parallel (with staggered delays inside executeModel)
+      const resultsArray = await Promise.all(
+        allModels.map((modelId, index) => executeModel(modelId, index))
+      );
+
+      // Flatten results array
+      const allResults = resultsArray.flat();
 
       // Update execution history (keep last 3 per prompt)
       setExecutionHistory(prev => {
