@@ -8,10 +8,7 @@ import { useAuth } from '@/components/AuthContext';
 interface Product {
   _id: string;
   name: string;
-  description: string;
-  category: string;
-  price: number;
-  keywords: string[];
+  description?: string;
 }
 
 export default function ProductsPage() {
@@ -80,7 +77,7 @@ export default function ProductsPage() {
 
       if (response.ok) {
         if (productToDelete) {
-          trackDeleteProduct(productToDelete.name, productToDelete.category);
+          trackDeleteProduct(productToDelete.name, 'General');
         }
         setProducts(products.filter((p) => p._id !== id));
       } else {
@@ -156,27 +153,10 @@ export default function ProductsPage() {
               key={product._id}
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-700">{product.category}</p>
-                </div>
-                <p className="text-lg font-bold text-indigo-600">${product.price}</p>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
 
-              <p className="text-sm text-gray-800 mb-4 line-clamp-2">{product.description}</p>
-
-              {product.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {product.keywords.map((keyword, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
+              {product.description && (
+                <p className="text-sm text-gray-800 mb-4 line-clamp-2">{product.description}</p>
               )}
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
