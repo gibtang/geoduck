@@ -9,7 +9,7 @@ const openrouter = createOpenAI({
 
 export const AVAILABLE_MODELS = [
   { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)' },
-  { id: 'google/gemini-pro', name: 'Gemini Pro' },
+  { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
   { id: 'openai/gpt-4o', name: 'GPT-4o' },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
   { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
