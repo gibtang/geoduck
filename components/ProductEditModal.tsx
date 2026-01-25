@@ -27,26 +27,6 @@ export default function ProductEditModal({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle keyboard shortcuts
-  React.useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
-      // Enter to save (only when not in textarea)
-      if (e.key === 'Enter' && !e.shiftKey && !(e.target instanceof HTMLTextAreaElement)) {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, name, description, onClose]);
-
   const handleSave = useCallback(async () => {
     // Validation
     if (!name.trim()) {
@@ -65,6 +45,26 @@ export default function ProductEditModal({
       setIsSaving(false);
     }
   }, [name, description, onSave, onClose]);
+
+  // Handle keyboard shortcuts
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+      // Enter to save (only when not in textarea)
+      if (e.key === 'Enter' && !e.shiftKey && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleSave, onClose]);
 
   if (!isOpen) return null;
 

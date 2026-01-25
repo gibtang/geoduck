@@ -31,7 +31,7 @@ export default function Home() {
             YOUR PRODUCTS ARE <span className="text-[#00d4ff]">INVISIBLE</span> TO AI SEARCH
           </h1>
           <p className="font-ibm text-lg md:text-xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
-            Google SGE, Bing Chat, Perplexity. AI search is how customers discover products now. Traditional SEO doesn't work anymore.
+            Google SGE, Bing Chat, Perplexity. AI search is how customers discover products now. Traditional SEO doesn&apos;t work anymore.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
@@ -186,7 +186,7 @@ export default function Home() {
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] border-l-4 border-l-[#00d4ff] rounded-lg p-8 hover:-translate-y-1 transition-transform">
             <div className="text-4xl mb-4">🎯</div>
             <h3 className="font-bricolage font-800 text-xl mb-3">Precision Detection</h3>
-            <p className="font-ibm text-gray-300 leading-relaxed">Know exactly where your products appear in AI responses and how they're being described</p>
+            <p className="font-ibm text-gray-300 leading-relaxed">Know exactly where your products appear in AI responses and how they&apos;re being described</p>
           </div>
 
           {/* Card 2 */}
@@ -219,7 +219,7 @@ export default function Home() {
         <div className="absolute w-[300px] h-[300px] border-2 border-[#ff6b6b] rounded-full bottom-[-150px] right-[-50px] opacity-20" aria-hidden="true" />
 
         <h2 className="font-bricolage font-800 text-4xl md:text-6xl lg:text-7xl mb-8 leading-[1.1] relative z-10">
-          DON'T GET LEFT BEHIND<br />
+          DON&apos;T GET LEFT BEHIND<br />
           IN THE AI SEARCH REVOLUTION
         </h2>
         <p className="font-ibm text-xl text-gray-300 mb-12 relative z-10">Start optimizing your products for AI search today</p>

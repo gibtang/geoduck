@@ -32,16 +32,12 @@ describe('Products API', () => {
       await Product.create({
         name: 'Product 1',
         description: 'Description 1',
-        category: 'Category 1',
-        price: 99.99,
         user: userId,
       });
 
       await Product.create({
         name: 'Product 2',
         description: 'Description 2',
-        category: 'Category 2',
-        price: 149.99,
         user: userId,
       });
 
@@ -122,9 +118,6 @@ describe('Products API', () => {
       const productData = {
         name: 'New Product',
         description: 'New product description',
-        category: 'Electronics',
-        price: 299.99,
-        keywords: ['test', 'new'],
       };
 
       const request = createRequest({
@@ -144,17 +137,11 @@ describe('Products API', () => {
       expect(response._getStatusCode()).toBe(201);
       expect(data.name).toBe(productData.name);
       expect(data.description).toBe(productData.description);
-      expect(data.category).toBe(productData.category);
-      expect(data.price).toBe(productData.price);
-      expect(data.keywords).toEqual(productData.keywords);
     });
 
-    it('should create product without keywords', async () => {
+    it('should create product with optional description', async () => {
       const productData = {
         name: 'New Product',
-        description: 'New product description',
-        category: 'Electronics',
-        price: 299.99,
       };
 
       const request = createRequest({
@@ -202,8 +189,6 @@ describe('Products API', () => {
       const productData = {
         name: 'New Product',
         description: 'Description',
-        category: 'Category',
-        price: 99.99,
       };
 
       const request = createRequest({
@@ -226,8 +211,6 @@ describe('Products API', () => {
       const productData = {
         name: 'New Product',
         description: 'Description',
-        category: 'Category',
-        price: 99.99,
       };
 
       const request = createRequest({

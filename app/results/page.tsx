@@ -204,7 +204,7 @@ export default function ResultsPage() {
                               Position: {mention.position}
                             </p>
                             <p className="text-xs text-gray-800 italic bg-gray-50 p-2 rounded">
-                              "{mention.context}"
+                              &quot;{mention.context}&quot;
                             </p>
                           </div>
                         ))}

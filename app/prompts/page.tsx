@@ -6,6 +6,7 @@ import { trackDeletePrompt } from '@/lib/ganalytics';
 import { useAuth } from '@/components/AuthContext';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
 import PromptEditModal from '@/components/PromptEditModal';
+import PromptDeleteConfirmModal from '@/components/PromptDeleteConfirmModal';
 import QuickTestModal from '@/components/QuickTestModal';
 
 interface Prompt {
@@ -52,6 +53,7 @@ export default function PromptsPage() {
 
   // Inline editing state
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+  const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null);
 
   // Quick Test modal state
   const [showQuickTest, setShowQuickTest] = useState(false);
@@ -128,13 +130,17 @@ export default function PromptsPage() {
     if (!user) return;
 
     const promptToDelete = prompts.find(p => p._id === id);
-    if (!confirm('Are you sure you want to delete this prompt?')) {
-      return;
+    if (promptToDelete) {
+      setDeletingPrompt(promptToDelete);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deletingPrompt) return;
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/prompts/${id}`, {
+      const response = await fetch(`/api/prompts/${deletingPrompt._id}`, {
         method: 'DELETE',
         headers: {
           'x-firebase-uid': user.uid,
@@ -143,18 +149,20 @@ export default function PromptsPage() {
       });
 
       if (response.ok) {
-        if (promptToDelete) {
-          trackDeletePrompt(promptToDelete.title);
-        }
-        setPrompts(prompts.filter((p) => p._id !== id));
+        trackDeletePrompt(deletingPrompt.title);
+        setPrompts(prompts.filter((p) => p._id !== deletingPrompt._id));
+        setDeletingPrompt(null);
 
         // Remove execution history for this prompt
         const newHistory = { ...executionHistory };
-        delete newHistory[id];
+        delete newHistory[deletingPrompt._id];
         setExecutionHistory(newHistory);
+      } else {
+        throw new Error('Failed to delete prompt');
       }
     } catch (error) {
       console.error('Error deleting prompt:', error);
+      throw error;
     }
   };
 
@@ -164,6 +172,10 @@ export default function PromptsPage() {
 
   const closeEditModal = () => {
     setEditingPrompt(null);
+  };
+
+  const closeDeleteModal = () => {
+    setDeletingPrompt(null);
   };
 
   const handleSaveEdit = async (data: { title: string; content: string }) => {
@@ -657,6 +669,15 @@ export default function PromptsPage() {
           isOpen={!!editingPrompt}
           onClose={closeEditModal}
           onSave={handleSaveEdit}
+        />
+      )}
+
+      {deletingPrompt && (
+        <PromptDeleteConfirmModal
+          prompt={deletingPrompt}
+          isOpen={!!deletingPrompt}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
         />
       )}
 

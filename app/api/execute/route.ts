@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     const products = await Product.find({ user: user._id });
 
-    let results = [];
+    const results = [];
 
     if (compareModels && compareModels.length > 0) {
       for (const modelName of compareModels) {
@@ -142,6 +142,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({ models: AVAILABLE_MODELS });
 }
