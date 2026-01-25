@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { trackDeleteProduct } from '@/lib/ganalytics';
 import { useAuth } from '@/components/AuthContext';
 import ProductEditModal from '@/components/ProductEditModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 interface Product {
   _id: string;
@@ -17,6 +18,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -63,13 +65,17 @@ export default function ProductsPage() {
     if (!user) return;
 
     const productToDelete = products.find(p => p._id === id);
-    if (!confirm('Are you sure you want to delete this product?')) {
-      return;
+    if (productToDelete) {
+      setDeletingProduct(productToDelete);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deletingProduct) return;
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`/api/products/${deletingProduct._id}`, {
         method: 'DELETE',
         headers: {
           'x-firebase-uid': user.uid,
@@ -78,16 +84,15 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        if (productToDelete) {
-          trackDeleteProduct(productToDelete.name, 'General');
-        }
-        setProducts(products.filter((p) => p._id !== id));
+        trackDeleteProduct(deletingProduct.name, 'General');
+        setProducts(products.filter((p) => p._id !== deletingProduct._id));
+        setDeletingProduct(null);
       } else {
-        alert('Failed to delete product. Please try again.');
+        throw new Error('Failed to delete product');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please check your connection and try again.');
+      throw error;
     }
   };
 
@@ -97,6 +102,10 @@ export default function ProductsPage() {
 
   const closeEditModal = () => {
     setEditingProduct(null);
+  };
+
+  const closeDeleteModal = () => {
+    setDeletingProduct(null);
   };
 
   const handleSaveEdit = async (data: { name: string; description: string }) => {
@@ -237,6 +246,15 @@ export default function ProductsPage() {
           isOpen={!!editingProduct}
           onClose={closeEditModal}
           onSave={handleSaveEdit}
+        />
+      )}
+
+      {deletingProduct && (
+        <DeleteConfirmModal
+          product={deletingProduct}
+          isOpen={!!deletingProduct}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
         />
       )}
     </div>
