@@ -6,6 +6,7 @@ import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { trackSignUp } from '@/lib/ganalytics';
+import GoogleSignIn from '@/components/GoogleSignIn';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,11 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  /**
+   * Handles email/password form submission
+   * Creates Firebase user, creates database record, tracks signup event, and redirects to dashboard
+   * @param e - Form submit event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -22,6 +28,7 @@ export default function SignUpPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
+      // Create user record in MongoDB after Firebase authentication
       const response = await fetch('/api/users/create', {
         method: 'POST',
         headers: {
@@ -34,16 +41,45 @@ export default function SignUpPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create user in database');
+        const errorData = await response.json().catch(() => ({}));
+
+        // CRITICAL: Delete Firebase user to avoid orphaned accounts
+        await userCredential.user.delete().catch(() => {
+          console.error('Failed to delete Firebase user after database error');
+        });
+
+        throw new Error(errorData.message || 'Failed to create user in database');
       }
+
+      // Get Firebase ID token and set it as a cookie for middleware authentication
+      const idToken = await userCredential.user.getIdToken();
+      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
 
       trackSignUp('email');
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+    } catch (err: unknown) {
+      // Type-safe error handling
+      const error = err as { code?: string; message?: string };
+
+      // Map Firebase errors to user-friendly messages
+      const errorMessage = error.code === 'auth/email-already-in-use'
+        ? 'An account with this email already exists. Please sign in.'
+        : error.code === 'auth/weak-password'
+        ? 'Password is too weak. Please use at least 6 characters.'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address format.'
+        : error.code === 'auth/too-many-requests'
+        ? 'Too many attempts. Please wait a few minutes before trying again.'
+        : error.message || 'Failed to create account';
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = () => {
+    trackSignUp('google');
   };
 
   return (
@@ -98,6 +134,21 @@ export default function SignUpPage() {
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <GoogleSignIn
+            mode="signup"
+            onSuccess={handleGoogleSuccess}
+            onError={setError}
+          />
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{' '}
