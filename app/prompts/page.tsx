@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
 import { useAuth } from '@/components/AuthContext';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
+import PromptEditModal from '@/components/PromptEditModal';
 
 interface Prompt {
   _id: string;
@@ -47,6 +48,9 @@ export default function PromptsPage() {
   const [executionHistory, setExecutionHistory] = useState<ExecutionHistory>({});
   const [lastSelectedModel, setLastSelectedModel] = useState<string>(AVAILABLE_MODELS[0].id);
   const [expandedCards, setExpandedCards] = useState<ExpandedCards>({});
+
+  // Inline editing state
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
 
   // Load last selected model and execution history from localStorage
   useEffect(() => {
@@ -147,6 +151,44 @@ export default function PromptsPage() {
       }
     } catch (error) {
       console.error('Error deleting prompt:', error);
+    }
+  };
+
+  const openEditModal = (prompt: Prompt) => {
+    setEditingPrompt(prompt);
+  };
+
+  const closeEditModal = () => {
+    setEditingPrompt(null);
+  };
+
+  const handleSaveEdit = async (data: { title: string; content: string }) => {
+    if (!user || !editingPrompt) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/prompts/${editingPrompt._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-firebase-uid': user.uid,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedPrompt = await response.json();
+        // Optimistic update
+        setPrompts(prompts.map(p =>
+          p._id === updatedPrompt._id ? updatedPrompt : p
+        ));
+      } else {
+        throw new Error('Failed to save prompt');
+      }
+    } catch (error) {
+      console.error('Error saving prompt:', error);
+      throw error;
     }
   };
 
@@ -327,16 +369,24 @@ export default function PromptsPage() {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">{prompt.title}</h3>
+                    <h3
+                      className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
+                      onDoubleClick={() => openEditModal(prompt)}
+                      title="Double-click to edit"
+                    >
+                      {prompt.title}
+                    </h3>
                     <div className="flex gap-2">
-                      <Link
-                        href={`/prompts/${prompt._id}/edit`}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(prompt);
+                        }}
                         className="text-gray-600 hover:text-gray-800 text-sm"
                         title="Edit"
-                        onClick={(e) => e.stopPropagation()}
                       >
                         ✏️
-                      </Link>
+                      </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -350,7 +400,13 @@ export default function PromptsPage() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-800 mb-4 line-clamp-3">{prompt.content}</p>
+                  <p
+                    className="text-sm text-gray-800 mb-4 line-clamp-3 cursor-pointer hover:text-indigo-600 transition-colors"
+                    onDoubleClick={() => openEditModal(prompt)}
+                    title="Double-click to edit"
+                  >
+                    {prompt.content}
+                  </p>
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-xs text-gray-600">{prompt.content.length}/512</p>
                     <p className="text-xs text-gray-700">Write your prompt as if you were a customer searching for products</p>
@@ -451,23 +507,27 @@ export default function PromptsPage() {
                             <span className="text-xs text-gray-500">{formatTimestamp(result.createdAt)}</span>
                           </div>
                           <p className="text-gray-700 text-sm leading-relaxed mb-2">{result.response}</p>
-                          {result.productsMentioned.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-gray-100">
-                              <p className="text-xs font-semibold text-gray-700 mb-1.5">
-                                Products Mentioned: {result.productsMentioned.length}
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {result.productsMentioned.map((product, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="bg-indigo-50 px-2 py-1 rounded text-xs font-medium text-indigo-600 border border-gray-200"
-                                  >
-                                    {product.productName}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          <div className="mt-2 pt-2 border-t border-gray-100">
+                            {result.productsMentioned.length > 0 ? (
+                              <>
+                                <p className="text-xs font-semibold text-gray-700 mb-1.5">
+                                  Products Mentioned: {result.productsMentioned.length}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {result.productsMentioned.map((product, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="bg-indigo-50 px-2 py-1 rounded text-xs font-medium text-indigo-600 border border-gray-200"
+                                    >
+                                      {product.productName}
+                                    </span>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-xs text-gray-500 italic">No products mentioned</p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -494,6 +554,16 @@ export default function PromptsPage() {
             );
           })}
         </div>
+      )}
+
+      {editingPrompt && (
+        <PromptEditModal
+          key={editingPrompt._id}
+          prompt={editingPrompt}
+          isOpen={!!editingPrompt}
+          onClose={closeEditModal}
+          onSave={handleSaveEdit}
+        />
       )}
     </div>
   );
