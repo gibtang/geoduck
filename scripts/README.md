@@ -2,9 +2,75 @@
 
 This directory contains utility scripts for the Geoduck project.
 
+## validate-models.js
+
+Validates all configured AI models against the OpenRouter API to ensure they are available and up-to-date.
+
+### Usage
+
+```bash
+# Run using npm
+npm run validate-models
+
+# Or run directly with node
+node scripts/validate-models.js
+```
+
+### What it does
+
+1. **Model Availability**: Verifies that all models configured in `lib/openrouter.ts` exist in the OpenRouter API
+2. **Name Changes**: Detects if model names have changed in OpenRouter
+3. **Pricing Information**: Displays current pricing for each valid model
+4. **Missing Models**: Flags any models that are no longer available
+5. **Suggestions**: Provides alternative model suggestions for missing models
+
+### Exit Codes
+
+- `0`: Validation passed (all models valid)
+- `1`: Validation failed (missing models found)
+- `2`: Error occurred (API fetch failed, timeout, etc.)
+
+### Example Output
+
+```
+================================================================================
+OpenRouter Model Validation Report
+================================================================================
+
+Configured Models: 7
+Available Models: 346
+
+✓ Valid Models (7/7):
+
+  • Gemini 2.0 Flash (Free)
+    ID: google/gemini-2.0-flash-exp:free
+    Pricing: $0/1M prompt tokens, $0/1M completion tokens
+
+  • Gemini 2.5 Flash
+    ID: google/gemini-2.5-flash
+    Pricing: $0.0000003/1M prompt tokens, $0.0000025/1M completion tokens
+
+⚠ Models with Name Changes (5):
+
+  • Gemini 2.5 Flash
+    Current OpenRouter Name: Google: Gemini 2.5 Flash
+    ID: google/gemini-2.5-flash
+
+────────────────────────────────────────────────────────────────────────────────
+⚠ Validation completed with 5 warnings
+================================================================================
+```
+
+### When to run it
+
+- **Before Deploying**: Ensure all configured models are still available
+- **After OpenRouter Updates**: Check if model IDs have changed
+- **CI/CD Pipelines**: Automatically validate models as part of deployment
+- **Maintenance**: Periodically check for pricing changes or model deprecations
+
 ## check-models.js
 
-Verifies that all model IDs in `AVAILABLE_MODELS` (from `lib/openrouter.ts`) are valid on OpenRouter.
+An older script that checks model IDs. See `validate-models.js` for the recommended approach.
 
 ### Usage
 
@@ -24,38 +90,6 @@ node scripts/check-models.js
 4. Suggests replacement models if any are invalid
 5. Shows other popular models available on OpenRouter
 
-### Example Output
-
-```
-🔍 Fetching available models from OpenRouter...
-
-✅ Found 346 models on OpenRouter
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ google/gemini-2.0-flash-exp:free
-   Gemini 2.0 Flash (Free)
-
-❌ google/gemini-pro
-   Gemini Pro
-   ⚠️  NOT FOUND on OpenRouter
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚠️  Found 1 invalid model(s):
-
-   - google/gemini-pro (Gemini Pro)
-
-💡 Suggestions for replacement:
-
-   Similar google models:
-
-   • google/gemini-2.5-flash
-     Gemini 2.5 Flash
-   • google/gemini-2.0-flash-exp:free (FREE)
-     Gemini 2.0 Flash Experimental (free)
-```
-
 ### When to run it
 
 Run this script whenever:
@@ -64,6 +98,3 @@ Run this script whenever:
 - You want to add new models to the list
 - Periodically (e.g., monthly) to ensure your models are still available
 
-### Updating the script
-
-If you add or remove models from `lib/openrouter.ts`, update the `AVAILABLE_MODELS` array in `check-models.js` to match.

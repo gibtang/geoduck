@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "check-models": "node scripts/check-models.js"
+    "check-models": "node scripts/check-models.js",
+    "validate-models": "node scripts/validate-models.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
