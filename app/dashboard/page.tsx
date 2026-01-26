@@ -1,16 +1,19 @@
 import Link from 'next/link';
+import { getDashboardMetadata } from '@/lib/metadata';
+
+export const metadata = getDashboardMetadata();
 
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome to GEO Platform</h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-gray-800">
           Optimize your products for AI-powered search engines
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-6">
         <Link href="/products">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -31,9 +34,29 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Products</h3>
-            <p className="text-sm text-gray-600">
-              Manage your product catalog
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-gray-800">
+                1. Manage your product catalog
+              </p>
+              <div className="relative group">
+                <svg
+                  className="w-4 h-4 text-gray-400 cursor-help"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  This will be used to see the products that are mentioned in the AI response
+                </div>
+              </div>
+            </div>
           </div>
         </Link>
 
@@ -57,34 +80,8 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Prompts</h3>
-            <p className="text-sm text-gray-600">
-              Create and manage test prompts
-            </p>
-          </div>
-        </Link>
-
-        <Link href="/execute">
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Execute</h3>
-            <p className="text-sm text-gray-600">
-              Run prompts against LLMs
+            <p className="text-sm text-gray-800">
+              2. Create, test, and execute prompts
             </p>
           </div>
         </Link>
@@ -109,8 +106,8 @@ export default function DashboardPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold mb-2">Results</h3>
-            <p className="text-sm text-gray-600">
-              View past results and analysis
+            <p className="text-sm text-gray-800">
+              3. View results and analysis
             </p>
           </div>
         </Link>
@@ -120,7 +117,7 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
           <li>Add your products to the catalog</li>
-          <li>Create prompts that simulate user queries</li>
+          <li>Create prompts that simulate user queries, or use Quick Test for ad-hoc testing</li>
           <li>Execute prompts against different LLMs</li>
           <li>Review results to see if your products are mentioned</li>
         </ol>

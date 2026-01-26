@@ -1,4 +1,7 @@
 import Header from '@/components/Header';
+import { getResultsMetadata } from '@/lib/metadata';
+
+export const metadata = getResultsMetadata();
 
 export default function ResultsLayout({
   children,

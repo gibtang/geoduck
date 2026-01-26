@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { title, content, category } = data;
+    const { title, content } = data;
 
-    if (!title || !content || !category) {
+    if (!title || !content) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
     const prompt = await Prompt.create({
       title,
       content,
-      category,
       user: user._id,
     });
 

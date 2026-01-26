@@ -28,7 +28,6 @@ describe('Prompt Model', () => {
     const promptData = {
       title: 'Test Prompt',
       content: 'What are the best products?',
-      category: 'Product Discovery',
       user: userId,
     };
 
@@ -36,7 +35,6 @@ describe('Prompt Model', () => {
 
     expect(prompt.title).toBe(promptData.title);
     expect(prompt.content).toBe(promptData.content);
-    expect(prompt.category).toBe(promptData.category);
     expect(prompt.user).toEqual(userId);
     expect(prompt.createdAt).toBeDefined();
     expect(prompt.updatedAt).toBeDefined();
@@ -54,7 +52,6 @@ describe('Prompt Model', () => {
     const prompt = await Prompt.create({
       title: 'Original Title',
       content: 'Original content',
-      category: 'Original Category',
       user: userId,
     });
 
@@ -71,14 +68,12 @@ describe('Prompt Model', () => {
     await Prompt.create({
       title: 'Prompt 1',
       content: 'Content 1',
-      category: 'Category 1',
       user: userId,
     });
 
     await Prompt.create({
       title: 'Prompt 2',
       content: 'Content 2',
-      category: 'Category 2',
       user: userId,
     });
 
@@ -91,7 +86,6 @@ describe('Prompt Model', () => {
     const prompt = await Prompt.create({
       title: 'Test Prompt',
       content: 'Test content',
-      category: 'Test Category',
       user: userId,
     });
 
@@ -105,7 +99,6 @@ describe('Prompt Model', () => {
     await Prompt.create({
       title: 'First Prompt',
       content: 'First content',
-      category: 'Category',
       user: userId,
     });
 
@@ -114,7 +107,6 @@ describe('Prompt Model', () => {
     await Prompt.create({
       title: 'Second Prompt',
       content: 'Second content',
-      category: 'Category',
       user: userId,
     });
 

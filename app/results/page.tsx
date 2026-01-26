@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
+import { useAuth } from '@/components/AuthContext';
 
 interface ProductMention {
   product: {
@@ -30,28 +29,25 @@ interface Result {
 export default function ResultsPage() {
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [expandedResult, setExpandedResult] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchResults(user);
-      } else {
-        setLoading(false);
-      }
-    });
+    if (user) {
+      fetchResults();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchResults = async () => {
+    if (!user) return;
 
-  const fetchResults = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/results', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -101,13 +97,13 @@ export default function ResultsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Results History</h1>
-        <p className="mt-2 text-gray-600">View your past prompt executions and analysis</p>
+        <p className="mt-2 text-gray-800">View your past prompt executions and analysis</p>
       </div>
 
       {results.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -120,7 +116,7 @@ export default function ResultsPage() {
             />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No results yet</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Execute some prompts to see results here.
           </p>
         </div>
@@ -147,7 +143,7 @@ export default function ResultsPage() {
                         {AVAILABLE_MODELS.find((m) => m.id === result.model)?.name || result.model}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-700">
                       {new Date(result.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -156,10 +152,10 @@ export default function ResultsPage() {
                       <p className="text-sm font-medium text-gray-900">
                         {result.productsMentioned.length} {result.productsMentioned.length === 1 ? 'Product' : 'Products'}
                       </p>
-                      <p className="text-xs text-gray-500">Mentioned</p>
+                      <p className="text-xs text-gray-700">Mentioned</p>
                     </div>
                     <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${
+                      className={`w-5 h-5 text-gray-700 transition-transform ${
                         expandedResult === result._id ? 'transform rotate-180' : ''
                       }`}
                       fill="none"
@@ -204,11 +200,11 @@ export default function ResultsPage() {
                                 {getSentimentIcon(mention.sentiment)} {mention.sentiment}
                               </span>
                             </div>
-                            <p className="text-xs text-gray-500 mb-2">
+                            <p className="text-xs text-gray-700 mb-2">
                               Position: {mention.position}
                             </p>
-                            <p className="text-xs text-gray-600 italic bg-gray-50 p-2 rounded">
-                              "{mention.context}"
+                            <p className="text-xs text-gray-800 italic bg-gray-50 p-2 rounded">
+                              &quot;{mention.context}&quot;
                             </p>
                           </div>
                         ))}

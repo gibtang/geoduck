@@ -1,40 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicPaths = ['/', '/signin', '/signup'];
+// Middleware now only protects API routes
+// Page routes are protected by AuthContext (client-side)
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicPaths.includes(pathname)) {
-    return NextResponse.next();
-  }
+  // Only protect API routes
+  if (pathname.startsWith('/api/')) {
+    const token = request.cookies.get('firebase-auth-token');
 
-  const token = request.cookies.get('firebase-auth-token');
+    // Allow public API endpoints (if any)
+    if (pathname === '/api/users/create') {
+      return NextResponse.next();
+    }
 
-  if (!token && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
-  if (!token && pathname.startsWith('/products')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
-  if (!token && pathname.startsWith('/prompts')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
-  if (!token && pathname.startsWith('/execute')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
-  if (!token && pathname.startsWith('/results')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
+    // Protect all other API routes
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/api/:path*'],
 };

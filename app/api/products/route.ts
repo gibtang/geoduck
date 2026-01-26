@@ -60,21 +60,18 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { name, description, category, price, keywords } = data;
+    const { name, description } = data;
 
-    if (!name || !description || !category || price === undefined) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Product name is required' },
         { status: 400 }
       );
     }
 
     const product = await Product.create({
       name,
-      description,
-      category,
-      price,
-      keywords: keywords || [],
+      description: description || '',
       user: user._id,
     });
 

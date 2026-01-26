@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { getHomepageMetadata } from "@/lib/metadata";
+
+export const metadata = getHomepageMetadata();
 
 export default function Home() {
   return (
@@ -27,8 +30,8 @@ export default function Home() {
           <h1 className="font-bricolage font-800 text-5xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight mb-8">
             YOUR PRODUCTS ARE <span className="text-[#00d4ff]">INVISIBLE</span> TO AI SEARCH
           </h1>
-          <p className="font-ibm text-lg md:text-xl text-[#a0a0a0] mb-12 max-w-2xl leading-relaxed">
-            Google SGE, Bing Chat, Perplexity. AI search is how customers discover products now. Traditional SEO doesn't work anymore.
+          <p className="font-ibm text-lg md:text-xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
+            Google SGE, Bing Chat, Perplexity. AI search is how customers discover products now. Traditional SEO doesn&apos;t work anymore.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
@@ -59,7 +62,7 @@ export default function Home() {
 
             {/* Product Input */}
             <div className="mb-5">
-              <div className="font-ibm text-sm text-[#a0a0a0] mb-2 uppercase tracking-wider">Product</div>
+              <div className="font-ibm text-sm text-gray-300 mb-2 uppercase tracking-wider">Product</div>
               <input
                 type="text"
                 value="Nike Air Zoom Pegasus 40"
@@ -70,7 +73,7 @@ export default function Home() {
 
             {/* Test Prompt */}
             <div className="mb-5">
-              <div className="font-ibm text-sm text-[#a0a0a0] mb-2 uppercase tracking-wider">Test Prompt</div>
+              <div className="font-ibm text-sm text-gray-300 mb-2 uppercase tracking-wider">Test Prompt</div>
               <input
                 type="text"
                 value="Best running shoes for marathons under $150"
@@ -81,7 +84,7 @@ export default function Home() {
 
             {/* AI Models */}
             <div className="mb-5">
-              <div className="font-ibm text-sm text-[#a0a0a0] mb-2 uppercase tracking-wider">AI Models</div>
+              <div className="font-ibm text-sm text-gray-300 mb-2 uppercase tracking-wider">AI Models</div>
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1.5 bg-[#00d4ff] text-[#0a0a0a] rounded-full font-ibm text-sm font-600">Gemini</span>
                 <span className="px-3 py-1.5 bg-[#00d4ff] text-[#0a0a0a] rounded-full font-ibm text-sm font-600">GPT-4o</span>
@@ -92,9 +95,9 @@ export default function Home() {
 
             {/* Results */}
             <div className="mb-5">
-              <div className="font-ibm text-sm text-[#a0a0a0] mb-2 uppercase tracking-wider">Results</div>
+              <div className="font-ibm text-sm text-gray-300 mb-2 uppercase tracking-wider">Results</div>
               <div className="bg-[#141414] border border-[#2a2a2a] rounded-lg p-4 min-h-[100px]">
-                <p className="font-ibm text-sm text-[#a0a0a0] mb-2">Based on your query, the top recommendations include:</p>
+                <p className="font-ibm text-sm text-gray-300 mb-2">Based on your query, the top recommendations include:</p>
                 <p className="font-ibm text-sm text-[#f5f5f5]">
                   The <span className="bg-[#00d4ff] text-[#0a0a0a] px-1.5 py-0.5 rounded font-600">Nike Air Zoom Pegasus 40</span> offers excellent cushioning...
                 </p>
@@ -123,19 +126,19 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto mb-16">
           <div className="p-8">
             <div className="font-bricolage font-800 text-6xl md:text-7xl text-[#00d4ff] leading-none mb-4">63%</div>
-            <div className="font-ibm text-lg text-[#a0a0a0]">of searches now use AI-generated responses</div>
+            <div className="font-ibm text-lg text-gray-300">of searches now use AI-generated responses</div>
           </div>
           <div className="p-8">
             <div className="font-bricolage font-800 text-6xl md:text-7xl text-[#00d4ff] leading-none mb-4">150M+</div>
-            <div className="font-ibm text-lg text-[#a0a0a0]">daily AI chat users looking for products</div>
+            <div className="font-ibm text-lg text-gray-300">daily AI chat users looking for products</div>
           </div>
           <div className="p-8">
             <div className="font-bricolage font-800 text-6xl md:text-7xl text-[#00d4ff] leading-none mb-4">87%</div>
-            <div className="font-ibm text-lg text-[#a0a0a0]">never click traditional search results</div>
+            <div className="font-ibm text-lg text-gray-300">never click traditional search results</div>
           </div>
         </div>
 
-        <p className="font-ibm text-xl md:text-2xl text-[#a0a0a0] max-w-3xl mx-auto leading-relaxed">
+        <p className="font-ibm text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
           Your products need Generative Engine Optimization. GEO is the new SEO—optimizing for how AI engines discover, understand, and recommend products.
         </p>
       </section>
@@ -151,7 +154,7 @@ export default function Home() {
               01
             </div>
             <h3 className="font-bricolage font-800 text-2xl mb-3">Add Your Products</h3>
-            <p className="font-ibm text-lg text-[#a0a0a0]">Import your catalog with names, descriptions, and keywords</p>
+            <p className="font-ibm text-lg text-gray-300">Import your catalog with names, descriptions, and keywords</p>
           </div>
 
           {/* Step 2 */}
@@ -160,7 +163,7 @@ export default function Home() {
               02
             </div>
             <h3 className="font-bricolage font-800 text-2xl mb-3">Test With Real Queries</h3>
-            <p className="font-ibm text-lg text-[#a0a0a0]">Simulate how AI engines respond to customer questions</p>
+            <p className="font-ibm text-lg text-gray-300">Simulate how AI engines respond to customer questions</p>
           </div>
 
           {/* Step 3 */}
@@ -169,7 +172,7 @@ export default function Home() {
               03
             </div>
             <h3 className="font-bricolage font-800 text-2xl mb-3">See Where You Appear</h3>
-            <p className="font-ibm text-lg text-[#a0a0a0]">Detect mentions, sentiment, and position in responses</p>
+            <p className="font-ibm text-lg text-gray-300">Detect mentions, sentiment, and position in responses</p>
           </div>
         </div>
       </section>
@@ -183,28 +186,28 @@ export default function Home() {
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] border-l-4 border-l-[#00d4ff] rounded-lg p-8 hover:-translate-y-1 transition-transform">
             <div className="text-4xl mb-4">🎯</div>
             <h3 className="font-bricolage font-800 text-xl mb-3">Precision Detection</h3>
-            <p className="font-ibm text-[#a0a0a0] leading-relaxed">Know exactly where your products appear in AI responses and how they're being described</p>
+            <p className="font-ibm text-gray-300 leading-relaxed">Know exactly where your products appear in AI responses and how they&apos;re being described</p>
           </div>
 
           {/* Card 2 */}
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] border-l-4 border-l-[#00d4ff] rounded-lg p-8 hover:-translate-y-1 transition-transform">
             <div className="text-4xl mb-4">📊</div>
             <h3 className="font-bricolage font-800 text-xl mb-3">Sentiment Insights</h3>
-            <p className="font-ibm text-[#a0a0a0] leading-relaxed">Understand if mentions are positive, neutral, or negative to optimize your product descriptions</p>
+            <p className="font-ibm text-gray-300 leading-relaxed">Understand if mentions are positive, neutral, or negative to optimize your product descriptions</p>
           </div>
 
           {/* Card 3 */}
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] border-l-4 border-l-[#00d4ff] rounded-lg p-8 hover:-translate-y-1 transition-transform">
             <div className="text-4xl mb-4">⚡</div>
             <h3 className="font-bricolage font-800 text-xl mb-3">Multi-Model Testing</h3>
-            <p className="font-ibm text-[#a0a0a0] leading-relaxed">Test against 7 AI models simultaneously—Gemini, GPT-4o, Claude, Llama, and more</p>
+            <p className="font-ibm text-gray-300 leading-relaxed">Test against 7 AI models simultaneously—Gemini, GPT-4o, Claude, Llama, and more</p>
           </div>
 
           {/* Card 4 */}
           <div className="bg-[#1a1a1a] border border-[#2a2a2a] border-l-4 border-l-[#00d4ff] rounded-lg p-8 hover:-translate-y-1 transition-transform">
             <div className="text-4xl mb-4">🔄</div>
             <h3 className="font-bricolage font-800 text-xl mb-3">Continuous Tracking</h3>
-            <p className="font-ibm text-[#a0a0a0] leading-relaxed">Monitor your visibility trends over time and stay ahead of the competition</p>
+            <p className="font-ibm text-gray-300 leading-relaxed">Monitor your visibility trends over time and stay ahead of the competition</p>
           </div>
         </div>
       </section>
@@ -216,10 +219,10 @@ export default function Home() {
         <div className="absolute w-[300px] h-[300px] border-2 border-[#ff6b6b] rounded-full bottom-[-150px] right-[-50px] opacity-20" aria-hidden="true" />
 
         <h2 className="font-bricolage font-800 text-4xl md:text-6xl lg:text-7xl mb-8 leading-[1.1] relative z-10">
-          DON'T GET LEFT BEHIND<br />
+          DON&apos;T GET LEFT BEHIND<br />
           IN THE AI SEARCH REVOLUTION
         </h2>
-        <p className="font-ibm text-xl text-[#a0a0a0] mb-12 relative z-10">Start optimizing your products for AI search today</p>
+        <p className="font-ibm text-xl text-gray-300 mb-12 relative z-10">Start optimizing your products for AI search today</p>
 
         <Link
           href="/signup"
@@ -228,12 +231,12 @@ export default function Home() {
           Start Your Free Optimization
         </Link>
 
-        <p className="font-ibm text-base text-[#a0a0a0] mt-8 relative z-10">No credit card required • 5 free analyses daily</p>
+        <p className="font-ibm text-base text-gray-300 mt-8 relative z-10">No credit card required • 5 free analyses daily</p>
       </section>
 
       {/* Footer */}
       <footer className="py-12 px-6 md:px-12 bg-[#0a0a0a] border-t border-[#2a2a2a] text-center">
-        <p className="font-ibm text-[#a0a0a0]">&copy; 2025 GEO Platform. All rights reserved.</p>
+        <p className="font-ibm text-gray-300">&copy; 2025 GEO Platform. All rights reserved.</p>
       </footer>
     </div>
   );

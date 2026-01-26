@@ -13,6 +13,8 @@ const firebaseConfig = {
   measurementId: env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+console.log(firebaseConfig);
+
 let _app: FirebaseApp;
 let _auth: Auth;
 

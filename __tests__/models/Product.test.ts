@@ -28,9 +28,6 @@ describe('Product Model', () => {
     const productData = {
       name: 'Test Product',
       description: 'A great test product',
-      category: 'Electronics',
-      price: 99.99,
-      keywords: ['test', 'sample'],
       user: userId,
     };
 
@@ -38,9 +35,6 @@ describe('Product Model', () => {
 
     expect(product.name).toBe(productData.name);
     expect(product.description).toBe(productData.description);
-    expect(product.category).toBe(productData.category);
-    expect(product.price).toBe(productData.price);
-    expect(product.keywords).toEqual(expect.arrayContaining(productData.keywords));
     expect(product.user).toEqual(userId);
     expect(product.createdAt).toBeDefined();
     expect(product.updatedAt).toBeDefined();
@@ -54,65 +48,45 @@ describe('Product Model', () => {
     await expect(Product.create(productData)).rejects.toThrow();
   });
 
-  it('should fail to create product with negative price', async () => {
+  it('should create product with optional description', async () => {
     const productData = {
       name: 'Test Product',
-      description: 'A great test product',
-      category: 'Electronics',
-      price: -10,
-      user: userId,
-    };
-
-    await expect(Product.create(productData)).rejects.toThrow();
-  });
-
-  it('should create product with empty keywords array', async () => {
-    const productData = {
-      name: 'Test Product',
-      description: 'A great test product',
-      category: 'Electronics',
-      price: 99.99,
-      keywords: [],
       user: userId,
     };
 
     const product = await Product.create(productData);
 
-    expect(product.keywords).toEqual([]);
+    expect(product.name).toBe(productData.name);
+    expect(product.description).toBeUndefined();
+    expect(product.user).toEqual(userId);
   });
 
   it('should update product', async () => {
     const product = await Product.create({
       name: 'Test Product',
       description: 'A great test product',
-      category: 'Electronics',
-      price: 99.99,
       user: userId,
     });
 
     product.name = 'Updated Product';
-    product.price = 149.99;
+    product.description = 'Updated description';
     await product.save();
 
     const updatedProduct = await Product.findById(product._id);
     expect(updatedProduct?.name).toBe('Updated Product');
-    expect(updatedProduct?.price).toBe(149.99);
+    expect(updatedProduct?.description).toBe('Updated description');
   });
 
   it('should find products by user', async () => {
     await Product.create({
       name: 'Product 1',
       description: 'Description 1',
-      category: 'Category 1',
-      price: 10,
       user: userId,
     });
 
     await Product.create({
       name: 'Product 2',
       description: 'Description 2',
-      category: 'Category 2',
-      price: 20,
       user: userId,
     });
 
@@ -125,8 +99,6 @@ describe('Product Model', () => {
     const product = await Product.create({
       name: 'Test Product',
       description: 'A great test product',
-      category: 'Electronics',
-      price: 99.99,
       user: userId,
     });
 

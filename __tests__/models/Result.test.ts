@@ -30,9 +30,6 @@ describe('Result Model', () => {
     const product = await Product.create({
       name: 'Test Product',
       description: 'A test product',
-      category: 'Test',
-      price: 99.99,
-      keywords: ['test'],
       user: userId,
     });
     productId = product._id;
@@ -40,7 +37,6 @@ describe('Result Model', () => {
     const prompt = await Prompt.create({
       title: 'Test Prompt',
       content: 'Test prompt content',
-      category: 'Test',
       user: userId,
     });
     promptId = prompt._id;
@@ -142,9 +138,6 @@ describe('Result Model', () => {
     const product2 = await Product.create({
       name: 'Product 2',
       description: 'Second product',
-      category: 'Test',
-      price: 49.99,
-      keywords: ['test2'],
       user: userId,
     });
 

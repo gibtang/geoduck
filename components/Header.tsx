@@ -25,7 +25,6 @@ export default function Header() {
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/products', label: 'Products' },
     { href: '/prompts', label: 'Prompts' },
-    { href: '/execute', label: 'Execute Prompt' },
     { href: '/results', label: 'Results' },
   ];
 
@@ -45,7 +44,7 @@ export default function Header() {
                   className={`text-sm font-medium transition-colors hover:text-gray-900 ${
                     pathname === link.href
                       ? 'text-gray-900 border-b-2 border-gray-900 pb-1'
-                      : 'text-gray-600'
+                      : 'text-gray-800'
                   }`}
                 >
                   {link.label}

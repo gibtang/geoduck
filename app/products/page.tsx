@@ -1,45 +1,42 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { trackDeleteProduct } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
+import ProductEditModal from '@/components/ProductEditModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 interface Product {
   _id: string;
   name: string;
-  description: string;
-  category: string;
-  price: number;
-  keywords: string[];
+  description?: string;
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        fetchProducts(user);
-      } else {
-        setLoading(false);
-      }
-    });
+    if (user) {
+      fetchProducts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-    return () => unsubscribe();
-  }, []);
+  const fetchProducts = async () => {
+    if (!user) return;
 
-  const fetchProducts = async (currentUser: any) => {
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/products', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -65,14 +62,20 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
+
     const productToDelete = products.find(p => p._id === id);
-    if (!confirm('Are you sure you want to delete this product?')) {
-      return;
+    if (productToDelete) {
+      setDeletingProduct(productToDelete);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deletingProduct) return;
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`/api/products/${deletingProduct._id}`, {
         method: 'DELETE',
         headers: {
           'x-firebase-uid': user.uid,
@@ -81,16 +84,57 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        if (productToDelete) {
-          trackDeleteProduct(productToDelete.name, productToDelete.category);
-        }
-        setProducts(products.filter((p) => p._id !== id));
+        trackDeleteProduct(deletingProduct.name, 'General');
+        setProducts(products.filter((p) => p._id !== deletingProduct._id));
+        setDeletingProduct(null);
       } else {
-        alert('Failed to delete product. Please try again.');
+        throw new Error('Failed to delete product');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please check your connection and try again.');
+      throw error;
+    }
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+  };
+
+  const closeEditModal = () => {
+    setEditingProduct(null);
+  };
+
+  const closeDeleteModal = () => {
+    setDeletingProduct(null);
+  };
+
+  const handleSaveEdit = async (data: { name: string; description: string }) => {
+    if (!user || !editingProduct) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/products/${editingProduct._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-firebase-uid': user.uid,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        // Optimistic update
+        setProducts(products.map(p =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        ));
+      } else {
+        throw new Error('Failed to save product');
+      }
+    } catch (error) {
+      console.error('Error saving product:', error);
+      throw error;
     }
   };
 
@@ -107,7 +151,7 @@ export default function ProductsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="mt-2 text-gray-600">Manage your product catalog</p>
+          <p className="mt-2 text-gray-800">Manage your product catalog</p>
         </div>
         <Link
           href="/products/new"
@@ -119,14 +163,14 @@ export default function ProductsPage() {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {products.length === 0 && !error ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -139,7 +183,7 @@ export default function ProductsPage() {
             />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No products</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Get started by adding your first product.
           </p>
           <div className="mt-6">
@@ -158,39 +202,34 @@ export default function ProductsPage() {
               key={product._id}
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-500">{product.category}</p>
-                </div>
-                <p className="text-lg font-bold text-indigo-600">${product.price}</p>
-              </div>
+              <h3
+                className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                onDoubleClick={() => openEditModal(product)}
+                title="Double-click to edit"
+              >
+                {product.name}
+              </h3>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-
-              {product.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {product.keywords.map((keyword, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
+              {product.description && (
+                <p
+                  className="text-sm text-gray-800 mb-4 line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                  onDoubleClick={() => openEditModal(product)}
+                  title="Double-click to edit"
+                >
+                  {product.description}
+                </p>
               )}
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <Link
-                  href={`/products/${product._id}/edit`}
+                <button
+                  onClick={() => openEditModal(product)}
                   className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   Edit
-                </Link>
+                </button>
                 <button
                   onClick={() => handleDelete(product._id)}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  className="text-red-700 hover:text-red-800 text-sm font-medium"
                 >
                   Delete
                 </button>
@@ -198,6 +237,25 @@ export default function ProductsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {editingProduct && (
+        <ProductEditModal
+          key={editingProduct._id}
+          product={editingProduct}
+          isOpen={!!editingProduct}
+          onClose={closeEditModal}
+          onSave={handleSaveEdit}
+        />
+      )}
+
+      {deletingProduct && (
+        <DeleteConfirmModal
+          product={deletingProduct}
+          isOpen={!!deletingProduct}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
+        />
       )}
     </div>
   );
