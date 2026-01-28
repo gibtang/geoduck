@@ -215,7 +215,7 @@ export default function ExecutePage() {
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-500"
                     placeholder="Enter your custom prompt..."
                   />
                 </div>
