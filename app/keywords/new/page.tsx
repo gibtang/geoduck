@@ -9,7 +9,6 @@ import { trackCreateKeyword } from '@/lib/ganalytics';
 export default function NewKeywordPage() {
   const [formData, setFormData] = useState({
     name: '',
-    keywords: '',
   });
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -35,10 +34,6 @@ export default function NewKeywordPage() {
 
     try {
       const token = await user.getIdToken();
-      const keywordsArray = formData.keywords
-        .split(',')
-        .map((k) => k.trim())
-        .filter((k) => k.length > 0);
 
       const response = await fetch('/api/keywords', {
         method: 'POST',
@@ -52,7 +47,7 @@ export default function NewKeywordPage() {
           description: 'Default description',
           category: 'General',
           price: 0,
-          keywords: keywordsArray,
+          keywords: [],
         }),
       });
 
@@ -96,24 +91,6 @@ export default function NewKeywordPage() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
             placeholder="e.g., Wireless Bluetooth Headphones"
           />
-        </div>
-
-        <div>
-          <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 mb-2">
-            Keywords
-          </label>
-          <input
-            type="text"
-            id="keywords"
-            name="keywords"
-            value={formData.keywords}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-            placeholder="e.g., wireless, bluetooth, noise-cancelling"
-          />
-          <p className="mt-1 text-sm text-gray-500">
-            Separate keywords with commas
-          </p>
         </div>
 
         <div className="flex justify-end gap-4 pt-4">
