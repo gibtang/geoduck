@@ -9,9 +9,6 @@ import { trackCreateKeyword } from '@/lib/ganalytics';
 export default function NewKeywordPage() {
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
-    category: '',
-    price: '',
     keywords: '',
   });
   const [loading, setLoading] = useState(false);
@@ -52,15 +49,15 @@ export default function NewKeywordPage() {
         },
         body: JSON.stringify({
           name: formData.name,
-          description: formData.description,
-          category: formData.category,
-          price: parseFloat(formData.price),
+          description: 'Default description',
+          category: 'General',
+          price: 0,
           keywords: keywordsArray,
         }),
       });
 
       if (response.ok) {
-        trackCreateKeyword(formData.name, formData.category);
+        trackCreateKeyword(formData.name, 'General');
         router.push('/keywords');
       }
     } catch (error) {
@@ -99,59 +96,6 @@ export default function NewKeywordPage() {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
             placeholder="e.g., Wireless Bluetooth Headphones"
           />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Description *
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            required
-            value={formData.description}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-            placeholder="Describe your keyword..."
-          />
-        </div>
-
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Category *
-          </label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            required
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-            placeholder="e.g., Electronics"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-            Price *
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2 text-gray-500">$</span>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              required
-              step="0.01"
-              min="0"
-              value={formData.price}
-              onChange={handleChange}
-              className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-              placeholder="0.00"
-            />
-          </div>
         </div>
 
         <div>
