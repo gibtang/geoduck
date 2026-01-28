@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const { name, description, category, price, keywords } = data;
+    const { name } = data;
     const { id } = await params;
 
     const keyword = await Keyword.findOneAndUpdate(
@@ -88,10 +88,6 @@ export async function PUT(
       },
       {
         name,
-        description,
-        category,
-        price,
-        keywords: keywords || [],
       },
       { new: true, runValidators: true }
     );

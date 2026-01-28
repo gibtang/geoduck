@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { name, description, category, price, keywords } = data;
+    const { name } = data;
 
-    if (!name || !description || !category || price === undefined) {
+    if (!name) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -71,10 +71,6 @@ export async function POST(request: NextRequest) {
 
     const keyword = await Keyword.create({
       name,
-      description,
-      category,
-      price,
-      keywords: keywords || [],
       user: user._id,
     });
 

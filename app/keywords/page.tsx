@@ -9,10 +9,6 @@ import { trackDeleteKeyword } from '@/lib/ganalytics';
 interface Keyword {
   _id: string;
   name: string;
-  description: string;
-  category: string;
-  price: number;
-  keywords: string[];
 }
 
 export default function KeywordsPage() {
@@ -82,7 +78,7 @@ export default function KeywordsPage() {
 
       if (response.ok) {
         if (keywordToDelete) {
-          trackDeleteKeyword(keywordToDelete.name, keywordToDelete.category);
+          trackDeleteKeyword(keywordToDelete.name);
         }
         setKeywords(keywords.filter((k) => k._id !== id));
       } else {
@@ -158,28 +154,9 @@ export default function KeywordsPage() {
               key={keyword._id}
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{keyword.name}</h3>
-                  <p className="text-sm text-gray-500">{keyword.category}</p>
-                </div>
-                <p className="text-lg font-bold text-indigo-600">${keyword.price}</p>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">{keyword.name}</h3>
               </div>
-
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{keyword.description}</p>
-
-              {keyword.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {keyword.keywords.map((kw, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                    >
-                      {kw}
-                    </span>
-                  ))}
-                </div>
-              )}
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <Link

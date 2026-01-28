@@ -47,16 +47,16 @@ export const trackLogout = () => {
 };
 
 // Keyword Management Events
-export const trackCreateKeyword = (keywordName: string, category?: string) => {
-  trackEvent('create_keyword', 'keyword_management', category || 'uncategorized');
+export const trackCreateKeyword = (keywordName: string) => {
+  trackEvent('create_keyword', 'keyword_management', keywordName);
 };
 
-export const trackUpdateKeyword = (keywordName: string, category?: string) => {
-  trackEvent('update_keyword', 'keyword_management', category || 'uncategorized');
+export const trackUpdateKeyword = (keywordName: string) => {
+  trackEvent('update_keyword', 'keyword_management', keywordName);
 };
 
-export const trackDeleteKeyword = (keywordName: string, category?: string) => {
-  trackEvent('delete_keyword', 'keyword_management', category || 'uncategorized');
+export const trackDeleteKeyword = (keywordName: string) => {
+  trackEvent('delete_keyword', 'keyword_management', keywordName);
 };
 
 // Prompt Management Events

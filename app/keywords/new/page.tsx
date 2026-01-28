@@ -48,7 +48,7 @@ export default function NewKeywordPage() {
       });
 
       if (response.ok) {
-        trackCreateKeyword(formData.name, 'General');
+        trackCreateKeyword(formData.name);
         router.push('/keywords');
       }
     } catch (error) {

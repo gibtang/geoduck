@@ -9,10 +9,6 @@ import { trackUpdateKeyword } from '@/lib/ganalytics';
 interface Keyword {
   _id: string;
   name: string;
-  description: string;
-  category: string;
-  price: number;
-  keywords: string[];
 }
 
 export default function EditKeywordPage() {
@@ -88,7 +84,7 @@ export default function EditKeywordPage() {
       });
 
       if (response.ok) {
-        trackUpdateKeyword(formData.name, 'General');
+        trackUpdateKeyword(formData.name);
         router.push('/keywords');
       } else {
         alert('Failed to update keyword');
