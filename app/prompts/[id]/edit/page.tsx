@@ -3,16 +3,25 @@
 import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
-import { trackCreatePrompt } from '@/lib/ganalytics';
+import { useRouter, useParams } from 'next/navigation';
+import { trackUpdatePrompt } from '@/lib/ganalytics';
 
-export default function NewPromptPage() {
+interface Prompt {
+  _id: string;
+  title: string;
+  content: string;
+}
+
+export default function EditPromptPage() {
+  const params = useParams();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
   });
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -21,11 +30,40 @@ export default function NewPromptPage() {
         router.push('/signin');
       } else {
         setUser(user);
+        fetchPrompt(user, params.id as string);
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, params.id]);
+
+  const fetchPrompt = async (currentUser: any, id: string) => {
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch(`/api/prompts/${id}`, {
+        headers: {
+          'x-firebase-uid': currentUser.uid,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data: Prompt = await response.json();
+        setFormData({
+          title: data.title,
+          content: data.content,
+        });
+        setError('');
+      } else {
+        setError('Failed to load prompt');
+      }
+    } catch (error) {
+      console.error('Error fetching prompt:', error);
+      setError('Failed to load prompt');
+    } finally {
+      setFetching(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +73,9 @@ export default function NewPromptPage() {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch('/api/prompts', {
-        method: 'POST',
+
+      const response = await fetch(`/api/prompts/${params.id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'x-firebase-uid': user.uid,
@@ -46,11 +85,14 @@ export default function NewPromptPage() {
       });
 
       if (response.ok) {
-        trackCreatePrompt(formData.title);
+        trackUpdatePrompt(formData.title);
         router.push('/prompts');
+      } else {
+        alert('Failed to update prompt');
       }
     } catch (error) {
-      console.error('Error creating prompt:', error);
+      console.error('Error updating prompt:', error);
+      alert('Failed to update prompt');
     } finally {
       setLoading(false);
     }
@@ -63,12 +105,26 @@ export default function NewPromptPage() {
     });
   };
 
+  if (fetching) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Create New Prompt</h1>
-        <p className="mt-2 text-gray-600">Create a test prompt for GEO analysis</p>
+        <h1 className="text-3xl font-bold text-gray-900">Edit Prompt</h1>
+        <p className="mt-2 text-gray-600">Update prompt information</p>
       </div>
+
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
         <div>
@@ -119,7 +175,7 @@ export default function NewPromptPage() {
             disabled={loading}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Prompt'}
+            {loading ? 'Updating...' : 'Update Prompt'}
           </button>
         </div>
       </form>

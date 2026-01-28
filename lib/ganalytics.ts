@@ -60,16 +60,16 @@ export const trackDeleteKeyword = (keywordName: string) => {
 };
 
 // Prompt Management Events
-export const trackCreatePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('create_prompt', 'prompt_management', category || 'uncategorized');
+export const trackCreatePrompt = (promptTitle: string) => {
+  trackEvent('create_prompt', 'prompt_management', promptTitle);
 };
 
-export const trackUpdatePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('update_prompt', 'prompt_management', category || 'uncategorized');
+export const trackUpdatePrompt = (promptTitle: string) => {
+  trackEvent('update_prompt', 'prompt_management', promptTitle);
 };
 
-export const trackDeletePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('delete_prompt', 'prompt_management', category || 'uncategorized');
+export const trackDeletePrompt = (promptTitle: string) => {
+  trackEvent('delete_prompt', 'prompt_management', promptTitle);
 };
 
 // Execution Events
