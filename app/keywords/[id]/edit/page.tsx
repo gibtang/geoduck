@@ -84,10 +84,6 @@ export default function EditKeywordPage() {
         },
         body: JSON.stringify({
           name: formData.name,
-          description: 'Default description',
-          category: 'General',
-          price: 0,
-          keywords: [],
         }),
       });
 

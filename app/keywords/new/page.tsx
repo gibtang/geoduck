@@ -44,10 +44,6 @@ export default function NewKeywordPage() {
         },
         body: JSON.stringify({
           name: formData.name,
-          description: 'Default description',
-          category: 'General',
-          price: 0,
-          keywords: [],
         }),
       });
 

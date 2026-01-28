@@ -2,9 +2,9 @@ import mongoose, { Schema, Model, Document, Types } from 'mongoose';
 
 export interface IKeyword extends Document {
   name: string;
-  description: string;
-  category: string;
-  price: number;
+  description?: string;
+  category?: string;
+  price?: number;
   keywords: string[];
   user: Types.ObjectId;
   createdAt: Date;
@@ -20,15 +20,15 @@ const KeywordSchema: Schema = new Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: false,
     },
     category: {
       type: String,
-      required: true,
+      required: false,
     },
     price: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
     },
     keywords: {
