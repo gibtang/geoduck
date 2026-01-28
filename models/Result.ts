@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model, Document, Types } from 'mongoose';
 
-export interface IProductMention {
-  product: Types.ObjectId;
+export interface IKeywordMention {
+  keyword: Types.ObjectId;
   position: number;
   sentiment: 'positive' | 'neutral' | 'negative';
   context: string;
@@ -11,15 +11,15 @@ export interface IResult extends Document {
   prompt?: Types.ObjectId | null;
   llmModel: string;
   response: string;
-  productsMentioned: IProductMention[];
+  keywordsMentioned: IKeywordMention[];
   user: Types.ObjectId;
   createdAt: Date;
 }
 
-const ProductMentionSchema = new Schema({
-  product: {
+const KeywordMentionSchema = new Schema({
+  keyword: {
     type: Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: 'Keyword',
     required: true,
   },
   position: {
@@ -52,8 +52,8 @@ const ResultSchema: Schema = new Schema(
       type: String,
       required: true,
     },
-    productsMentioned: {
-      type: [ProductMentionSchema],
+    keywordsMentioned: {
+      type: [KeywordMentionSchema],
       default: [],
     },
     user: {

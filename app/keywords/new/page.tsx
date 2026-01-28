@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { trackCreateProduct } from '@/lib/ganalytics';
+import { trackCreateKeyword } from '@/lib/ganalytics';
 
-export default function NewProductPage() {
+export default function NewKeywordPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -43,7 +43,7 @@ export default function NewProductPage() {
         .map((k) => k.trim())
         .filter((k) => k.length > 0);
 
-      const response = await fetch('/api/products', {
+      const response = await fetch('/api/keywords', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,11 +60,11 @@ export default function NewProductPage() {
       });
 
       if (response.ok) {
-        trackCreateProduct(formData.name, formData.category);
-        router.push('/products');
+        trackCreateKeyword(formData.name, formData.category);
+        router.push('/keywords');
       }
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('Error creating keyword:', error);
     } finally {
       setLoading(false);
     }
@@ -80,14 +80,14 @@ export default function NewProductPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Add New Product</h1>
-        <p className="mt-2 text-gray-600">Add a product to your catalog</p>
+        <h1 className="text-3xl font-bold text-gray-900">Add New Keyword</h1>
+        <p className="mt-2 text-gray-600">Add a keyword to your catalog</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Product Name *
+            Keyword Name *
           </label>
           <input
             type="text"
@@ -113,7 +113,7 @@ export default function NewProductPage() {
             onChange={handleChange}
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="Describe your product..."
+            placeholder="Describe your keyword..."
           />
         </div>
 
@@ -175,7 +175,7 @@ export default function NewProductPage() {
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
-            onClick={() => router.push('/products')}
+            onClick={() => router.push('/keywords')}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Cancel
@@ -185,7 +185,7 @@ export default function NewProductPage() {
             disabled={loading}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Product'}
+            {loading ? 'Creating...' : 'Create Keyword'}
           </button>
         </div>
       </form>

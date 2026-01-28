@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import Result from '@/models/Result';
 import Prompt from '@/models/Prompt';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import User from '@/models/User';
 import { connect, closeDatabase, clearDatabase } from '../utils/mongodb';
 
 describe('Result Model', () => {
   let userId: mongoose.Types.ObjectId;
-  let productId: mongoose.Types.ObjectId;
+  let keywordId: mongoose.Types.ObjectId;
   let promptId: mongoose.Types.ObjectId;
 
   beforeAll(async () => {
@@ -27,15 +27,15 @@ describe('Result Model', () => {
     });
     userId = user._id;
 
-    const product = await Product.create({
-      name: 'Test Product',
-      description: 'A test product',
+    const keyword = await Keyword.create({
+      name: 'Test Keyword',
+      description: 'A test keyword',
       category: 'Test',
       price: 99.99,
       keywords: ['test'],
       user: userId,
     });
-    productId = product._id;
+    keywordId = keyword._id;
 
     const prompt = await Prompt.create({
       title: 'Test Prompt',
@@ -51,12 +51,12 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'This is a test response',
-      productsMentioned: [
+      keywordsMentioned: [
         {
-          product: productId,
+          keyword: keywordId,
           position: 10,
           sentiment: 'positive' as const,
-          context: 'Test Product is great',
+          context: 'Test Keyword is great',
         },
       ],
       user: userId,
@@ -67,9 +67,9 @@ describe('Result Model', () => {
     expect(result.prompt).toEqual(promptId);
     expect(result.llmModel).toBe(resultData.llmModel);
     expect(result.response).toBe(resultData.response);
-    expect(result.productsMentioned).toHaveLength(1);
-    expect(result.productsMentioned[0].product).toEqual(productId);
-    expect(result.productsMentioned[0].sentiment).toBe('positive');
+    expect(result.keywordsMentioned).toHaveLength(1);
+    expect(result.keywordsMentioned[0].keyword).toEqual(keywordId);
+    expect(result.keywordsMentioned[0].sentiment).toBe('positive');
     expect(result.createdAt).toBeDefined();
   });
 
@@ -77,7 +77,7 @@ describe('Result Model', () => {
     const resultData = {
       llmModel: 'gemini-2.0-flash',
       response: 'This is a test response',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     };
 
@@ -85,7 +85,7 @@ describe('Result Model', () => {
 
     expect(result.prompt).toBeUndefined();
     expect(result.llmModel).toBe(resultData.llmModel);
-    expect(result.productsMentioned).toEqual([]);
+    expect(result.keywordsMentioned).toEqual([]);
   });
 
   it('should fail to create result without required fields', async () => {
@@ -101,9 +101,9 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Test response',
-      productsMentioned: [
+      keywordsMentioned: [
         {
-          product: productId,
+          keyword: keywordId,
           position: 10,
           sentiment: 'invalid' as any,
           context: 'Test context',
@@ -123,9 +123,9 @@ describe('Result Model', () => {
         prompt: promptId,
         llmModel: 'gemini-2.0-flash',
         response: 'Test response',
-        productsMentioned: [
+        keywordsMentioned: [
           {
-            product: productId,
+            keyword: keywordId,
             position: 10,
             sentiment,
             context: 'Test context',
@@ -134,14 +134,14 @@ describe('Result Model', () => {
         user: userId,
       });
 
-      expect(result.productsMentioned[0].sentiment).toBe(sentiment);
+      expect(result.keywordsMentioned[0].sentiment).toBe(sentiment);
     }
   });
 
-  it('should store multiple product mentions', async () => {
-    const product2 = await Product.create({
-      name: 'Product 2',
-      description: 'Second product',
+  it('should store multiple keyword mentions', async () => {
+    const keyword2 = await Keyword.create({
+      name: 'Keyword 2',
+      description: 'Second keyword',
       category: 'Test',
       price: 49.99,
       keywords: ['test2'],
@@ -152,24 +152,24 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Test response',
-      productsMentioned: [
+      keywordsMentioned: [
         {
-          product: productId,
+          keyword: keywordId,
           position: 10,
           sentiment: 'positive',
-          context: 'Test Product is great',
+          context: 'Test Keyword is great',
         },
         {
-          product: product2._id,
+          keyword: keyword2._id,
           position: 50,
           sentiment: 'neutral',
-          context: 'Product 2 is okay',
+          context: 'Keyword 2 is okay',
         },
       ],
       user: userId,
     });
 
-    expect(result.productsMentioned).toHaveLength(2);
+    expect(result.keywordsMentioned).toHaveLength(2);
   });
 
   it('should find results by user', async () => {
@@ -177,7 +177,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Response 1',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 
@@ -185,7 +185,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gpt-4o',
       response: 'Response 2',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 
@@ -199,7 +199,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Response 1',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 
@@ -207,7 +207,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gpt-4o',
       response: 'Response 2',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 
@@ -217,17 +217,17 @@ describe('Result Model', () => {
     expect(geminiResults[0].llmModel).toBe('gemini-2.0-flash');
   });
 
-  it('should populate prompt and product references', async () => {
+  it('should populate prompt and keyword references', async () => {
     const result = await Result.create({
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Test response',
-      productsMentioned: [
+      keywordsMentioned: [
         {
-          product: productId,
+          keyword: keywordId,
           position: 10,
           sentiment: 'positive',
-          context: 'Test Product is great',
+          context: 'Test Keyword is great',
         },
       ],
       user: userId,
@@ -235,11 +235,11 @@ describe('Result Model', () => {
 
     const populatedResult = await Result.findById(result._id)
       .populate('prompt')
-      .populate('productsMentioned.product');
+      .populate('keywordsMentioned.keyword');
 
     expect(populatedResult?.prompt).toBeDefined();
     expect((populatedResult?.prompt as any).title).toBe('Test Prompt');
-    expect((populatedResult?.productsMentioned[0].product as any).name).toBe('Test Product');
+    expect((populatedResult?.keywordsMentioned[0].keyword as any).name).toBe('Test Keyword');
   });
 
   it('should sort results by creation date', async () => {
@@ -247,7 +247,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'First response',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 
@@ -257,7 +257,7 @@ describe('Result Model', () => {
       prompt: promptId,
       llmModel: 'gemini-2.0-flash',
       response: 'Second response',
-      productsMentioned: [],
+      keywordsMentioned: [],
       user: userId,
     });
 

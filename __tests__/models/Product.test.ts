@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import User from '@/models/User';
 import { connect, closeDatabase, clearDatabase } from '../utils/mongodb';
 
-describe('Product Model', () => {
+describe('Keyword Model', () => {
   let userId: mongoose.Types.ObjectId;
 
   beforeAll(async () => {
@@ -24,115 +24,115 @@ describe('Product Model', () => {
     userId = user._id;
   });
 
-  it('should create a product with valid data', async () => {
-    const productData = {
-      name: 'Test Product',
-      description: 'A great test product',
+  it('should create a keyword with valid data', async () => {
+    const keywordData = {
+      name: 'Test Keyword',
+      description: 'A great test keyword',
       category: 'Electronics',
       price: 99.99,
       keywords: ['test', 'sample'],
       user: userId,
     };
 
-    const product = await Product.create(productData);
+    const keyword = await Keyword.create(keywordData);
 
-    expect(product.name).toBe(productData.name);
-    expect(product.description).toBe(productData.description);
-    expect(product.category).toBe(productData.category);
-    expect(product.price).toBe(productData.price);
-    expect(product.keywords).toEqual(expect.arrayContaining(productData.keywords));
-    expect(product.user).toEqual(userId);
-    expect(product.createdAt).toBeDefined();
-    expect(product.updatedAt).toBeDefined();
+    expect(keyword.name).toBe(keywordData.name);
+    expect(keyword.description).toBe(keywordData.description);
+    expect(keyword.category).toBe(keywordData.category);
+    expect(keyword.price).toBe(keywordData.price);
+    expect(keyword.keywords).toEqual(expect.arrayContaining(keywordData.keywords));
+    expect(keyword.user).toEqual(userId);
+    expect(keyword.createdAt).toBeDefined();
+    expect(keyword.updatedAt).toBeDefined();
   });
 
-  it('should fail to create product without required fields', async () => {
-    const productData = {
-      name: 'Test Product',
+  it('should fail to create keyword without required fields', async () => {
+    const keywordData = {
+      name: 'Test Keyword',
     };
 
-    await expect(Product.create(productData)).rejects.toThrow();
+    await expect(Keyword.create(keywordData)).rejects.toThrow();
   });
 
-  it('should fail to create product with negative price', async () => {
-    const productData = {
-      name: 'Test Product',
-      description: 'A great test product',
+  it('should fail to create keyword with negative price', async () => {
+    const keywordData = {
+      name: 'Test Keyword',
+      description: 'A great test keyword',
       category: 'Electronics',
       price: -10,
       user: userId,
     };
 
-    await expect(Product.create(productData)).rejects.toThrow();
+    await expect(Keyword.create(keywordData)).rejects.toThrow();
   });
 
-  it('should create product with empty keywords array', async () => {
-    const productData = {
-      name: 'Test Product',
-      description: 'A great test product',
+  it('should create keyword with empty keywords array', async () => {
+    const keywordData = {
+      name: 'Test Keyword',
+      description: 'A great test keyword',
       category: 'Electronics',
       price: 99.99,
       keywords: [],
       user: userId,
     };
 
-    const product = await Product.create(productData);
+    const keyword = await Keyword.create(keywordData);
 
-    expect(product.keywords).toEqual([]);
+    expect(keyword.keywords).toEqual([]);
   });
 
-  it('should update product', async () => {
-    const product = await Product.create({
-      name: 'Test Product',
-      description: 'A great test product',
+  it('should update keyword', async () => {
+    const keyword = await Keyword.create({
+      name: 'Test Keyword',
+      description: 'A great test keyword',
       category: 'Electronics',
       price: 99.99,
       user: userId,
     });
 
-    product.name = 'Updated Product';
-    product.price = 149.99;
-    await product.save();
+    keyword.name = 'Updated Keyword';
+    keyword.price = 149.99;
+    await keyword.save();
 
-    const updatedProduct = await Product.findById(product._id);
-    expect(updatedProduct?.name).toBe('Updated Product');
-    expect(updatedProduct?.price).toBe(149.99);
+    const updatedKeyword = await Keyword.findById(keyword._id);
+    expect(updatedKeyword?.name).toBe('Updated Keyword');
+    expect(updatedKeyword?.price).toBe(149.99);
   });
 
-  it('should find products by user', async () => {
-    await Product.create({
-      name: 'Product 1',
+  it('should find keywords by user', async () => {
+    await Keyword.create({
+      name: 'Keyword 1',
       description: 'Description 1',
       category: 'Category 1',
       price: 10,
       user: userId,
     });
 
-    await Product.create({
-      name: 'Product 2',
+    await Keyword.create({
+      name: 'Keyword 2',
       description: 'Description 2',
       category: 'Category 2',
       price: 20,
       user: userId,
     });
 
-    const products = await Product.find({ user: userId });
+    const keywords = await Keyword.find({ user: userId });
 
-    expect(products).toHaveLength(2);
+    expect(keywords).toHaveLength(2);
   });
 
-  it('should delete product', async () => {
-    const product = await Product.create({
-      name: 'Test Product',
-      description: 'A great test product',
+  it('should delete keyword', async () => {
+    const keyword = await Keyword.create({
+      name: 'Test Keyword',
+      description: 'A great test keyword',
       category: 'Electronics',
       price: 99.99,
       user: userId,
     });
 
-    await Product.findByIdAndDelete(product._id);
+    await Keyword.findByIdAndDelete(keyword._id);
 
-    const deletedProduct = await Product.findById(product._id);
-    expect(deletedProduct).toBeNull();
+    const deletedKeyword = await Keyword.findById(keyword._id);
+    expect(deletedKeyword).toBeNull();
   });
 });

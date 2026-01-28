@@ -1,10 +1,10 @@
 import { createRequest, createResponse } from 'node-mocks-http';
-import { GET, POST } from '@/app/api/products/route';
+import { GET, POST } from '@/app/api/keywords/route';
 import { connect, closeDatabase, clearDatabase } from '../utils/mongodb';
 import User from '@/models/User';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 
-describe('Products API', () => {
+describe('Keywords API', () => {
   let userId: string;
   let firebaseUid: string;
 
@@ -27,18 +27,18 @@ describe('Products API', () => {
     firebaseUid = user.firebaseUid;
   });
 
-  describe('GET /api/products', () => {
-    it('should return user products', async () => {
-      await Product.create({
-        name: 'Product 1',
+  describe('GET /api/keywords', () => {
+    it('should return user keywords', async () => {
+      await Keyword.create({
+        name: 'Keyword 1',
         description: 'Description 1',
         category: 'Category 1',
         price: 99.99,
         user: userId,
       });
 
-      await Product.create({
-        name: 'Product 2',
+      await Keyword.create({
+        name: 'Keyword 2',
         description: 'Description 2',
         category: 'Category 2',
         price: 149.99,
@@ -60,11 +60,11 @@ describe('Products API', () => {
 
       expect(response._getStatusCode()).toBe(200);
       expect(data).toHaveLength(2);
-      expect(data[0].name).toBe('Product 1');
-      expect(data[1].name).toBe('Product 2');
+      expect(data[0].name).toBe('Keyword 1');
+      expect(data[1].name).toBe('Keyword 2');
     });
 
-    it('should return empty array for user with no products', async () => {
+    it('should return empty array for user with no keywords', async () => {
       const request = createRequest({
         method: 'GET',
         headers: {
@@ -117,11 +117,11 @@ describe('Products API', () => {
     });
   });
 
-  describe('POST /api/products', () => {
-    it('should create a new product', async () => {
-      const productData = {
-        name: 'New Product',
-        description: 'New product description',
+  describe('POST /api/keywords', () => {
+    it('should create a new keyword', async () => {
+      const keywordData = {
+        name: 'New Keyword',
+        description: 'New keyword description',
         category: 'Electronics',
         price: 299.99,
         keywords: ['test', 'new'],
@@ -132,7 +132,7 @@ describe('Products API', () => {
         headers: {
           'x-firebase-uid': firebaseUid,
         },
-        body: productData,
+        body: keywordData,
       });
 
       const response = createResponse();
@@ -142,17 +142,17 @@ describe('Products API', () => {
       const data = JSON.parse(response._getData());
 
       expect(response._getStatusCode()).toBe(201);
-      expect(data.name).toBe(productData.name);
-      expect(data.description).toBe(productData.description);
-      expect(data.category).toBe(productData.category);
-      expect(data.price).toBe(productData.price);
-      expect(data.keywords).toEqual(productData.keywords);
+      expect(data.name).toBe(keywordData.name);
+      expect(data.description).toBe(keywordData.description);
+      expect(data.category).toBe(keywordData.category);
+      expect(data.price).toBe(keywordData.price);
+      expect(data.keywords).toEqual(keywordData.keywords);
     });
 
-    it('should create product without keywords', async () => {
-      const productData = {
-        name: 'New Product',
-        description: 'New product description',
+    it('should create keyword without keywords', async () => {
+      const keywordData = {
+        name: 'New Keyword',
+        description: 'New keyword description',
         category: 'Electronics',
         price: 299.99,
       };
@@ -162,7 +162,7 @@ describe('Products API', () => {
         headers: {
           'x-firebase-uid': firebaseUid,
         },
-        body: productData,
+        body: keywordData,
       });
 
       const response = createResponse();
@@ -176,8 +176,8 @@ describe('Products API', () => {
     });
 
     it('should return 400 with missing required fields', async () => {
-      const productData = {
-        name: 'New Product',
+      const keywordData = {
+        name: 'New Keyword',
       };
 
       const request = createRequest({
@@ -185,7 +185,7 @@ describe('Products API', () => {
         headers: {
           'x-firebase-uid': firebaseUid,
         },
-        body: productData,
+        body: keywordData,
       });
 
       const response = createResponse();
@@ -199,8 +199,8 @@ describe('Products API', () => {
     });
 
     it('should return 401 without firebase uid', async () => {
-      const productData = {
-        name: 'New Product',
+      const keywordData = {
+        name: 'New Keyword',
         description: 'Description',
         category: 'Category',
         price: 99.99,
@@ -209,7 +209,7 @@ describe('Products API', () => {
       const request = createRequest({
         method: 'POST',
         headers: {},
-        body: productData,
+        body: keywordData,
       });
 
       const response = createResponse();
@@ -223,8 +223,8 @@ describe('Products API', () => {
     });
 
     it('should return 404 for non-existent user', async () => {
-      const productData = {
-        name: 'New Product',
+      const keywordData = {
+        name: 'New Keyword',
         description: 'Description',
         category: 'Category',
         price: 99.99,
@@ -235,7 +235,7 @@ describe('Products API', () => {
         headers: {
           'x-firebase-uid': 'non-existent-uid',
         },
-        body: productData,
+        body: keywordData,
       });
 
       const response = createResponse();

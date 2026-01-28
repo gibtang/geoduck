@@ -32,7 +32,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Products</h3>
             <p className="text-sm text-gray-600">
-              Manage your product catalog
+              Manage your keyword catalog
             </p>
           </div>
         </Link>

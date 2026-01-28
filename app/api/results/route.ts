@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     const results = await Result.find({ user: user._id })
       .populate('prompt')
-      .populate('productsMentioned.product')
+      .populate('keywordsMentioned.keyword')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);

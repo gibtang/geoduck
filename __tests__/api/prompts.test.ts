@@ -101,8 +101,8 @@ describe('Prompts API', () => {
     it('should create a new prompt', async () => {
       const promptData = {
         title: 'New Prompt',
-        content: 'What are the best products?',
-        category: 'Product Discovery',
+        content: 'What are the best keywords?',
+        category: 'Keyword Discovery',
       };
 
       const request = createRequest({

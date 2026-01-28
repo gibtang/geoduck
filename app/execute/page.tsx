@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { AVAILABLE_MODELS } from '@/lib/openrouter';
-import { trackExecutePrompt, trackProductMentioned } from '@/lib/ganalytics';
+import { trackExecutePrompt, trackKeywordMentioned } from '@/lib/ganalytics';
 
 interface Prompt {
   _id: string;
@@ -115,7 +115,7 @@ export default function ExecutePage() {
         // Track product mentions
         data.results.forEach((result: ExecutionResult) => {
           result.productsMentioned.forEach((mention: ProductMention) => {
-            trackProductMentioned(
+            trackKeywordMentioned(
               mention.productName,
               AVAILABLE_MODELS.find(m => m.id === result.model)?.name || result.model,
               mention.sentiment
@@ -339,7 +339,7 @@ export default function ExecutePage() {
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                       <p className="text-sm text-yellow-800">
-                        No products were mentioned in the response.
+                        No keywords were mentioned in the response.
                       </p>
                     </div>
                   )}

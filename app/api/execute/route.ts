@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import Prompt from '@/models/Prompt';
 import Result from '@/models/Result';
 import { executePromptNonStreaming, AVAILABLE_MODELS } from '@/lib/openrouter';
-import { detectProductMentions } from '@/lib/productDetection';
+import { detectKeywordMentions } from '@/lib/keywordDetection';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const products = await Product.find({ user: user._id });
+    const keywords = await Keyword.find({ user: user._id });
 
     let results = [];
 
@@ -73,14 +73,14 @@ export async function POST(request: NextRequest) {
         const response = await executePromptNonStreaming(modelName, prompt);
         const fullResponse = await response.text;
 
-        const productMentions = detectProductMentions(fullResponse, products);
+        const keywordMentions = detectKeywordMentions(fullResponse, keywords);
 
         const result = await Result.create({
           prompt: promptDoc?._id || null,
           llmModel: modelName,
           response: fullResponse,
-          productsMentioned: productMentions.map((mention) => ({
-            product: mention.product._id,
+          keywordsMentioned: keywordMentions.map((mention) => ({
+            keyword: mention.keyword._id,
             position: mention.position,
             sentiment: mention.sentiment,
             context: mention.context,
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
           _id: result._id,
           model: modelName,
           response: fullResponse,
-          productsMentioned: productMentions.map((pm) => ({
-            ...pm,
-            productId: pm.product._id,
-            productName: pm.product.name,
+          keywordsMentioned: keywordMentions.map((km) => ({
+            ...km,
+            keywordId: km.keyword._id,
+            keywordName: km.keyword.name,
           })),
           createdAt: result.createdAt,
         });
@@ -104,14 +104,14 @@ export async function POST(request: NextRequest) {
       const response = await executePromptNonStreaming(model, prompt);
       const fullResponse = await response.text;
 
-      const productMentions = detectProductMentions(fullResponse, products);
+      const keywordMentions = detectKeywordMentions(fullResponse, keywords);
 
       const result = await Result.create({
         prompt: promptDoc?._id || null,
         llmModel: model,
         response: fullResponse,
-        productsMentioned: productMentions.map((mention) => ({
-          product: mention.product._id,
+        keywordsMentioned: keywordMentions.map((mention) => ({
+          keyword: mention.keyword._id,
           position: mention.position,
           sentiment: mention.sentiment,
           context: mention.context,
@@ -123,10 +123,10 @@ export async function POST(request: NextRequest) {
         _id: result._id,
         model,
         response: fullResponse,
-        productsMentioned: productMentions.map((pm) => ({
-          ...pm,
-          productId: pm.product._id,
-          productName: pm.product.name,
+        keywordsMentioned: keywordMentions.map((km) => ({
+          ...km,
+          keywordId: km.keyword._id,
+          keywordName: km.keyword.name,
         })),
         createdAt: result.createdAt,
       });

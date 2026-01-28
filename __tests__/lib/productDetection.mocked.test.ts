@@ -1,7 +1,7 @@
-import { detectProductMentions, highlightProductMentions } from '@/lib/productDetection';
+import { detectKeywordMentions, highlightKeywordMentions } from '@/lib/keywordDetection';
 
-describe('Product Detection (Mocked)', () => {
-  const mockProducts = [
+describe('Keyword Detection (Mocked)', () => {
+  const mockKeywords = [
     {
       _id: '1',
       name: 'Wireless Headphones',
@@ -16,52 +16,52 @@ describe('Product Detection (Mocked)', () => {
     },
   ];
 
-  describe('detectProductMentions', () => {
-    it('should detect product by name', () => {
+  describe('detectKeywordMentions', () => {
+    it('should detect keyword by name', () => {
       const response = 'I recommend the Wireless Headphones for music lovers.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].product.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
       expect(mentions[0].position).toBeGreaterThanOrEqual(0);
     });
 
-    it('should detect product by keyword', () => {
+    it('should detect keyword by keyword', () => {
       const response = 'This bluetooth device is excellent.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].product.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
       expect(mentions[0].position).toBeGreaterThanOrEqual(0);
     });
 
-    it('should detect multiple products', () => {
+    it('should detect multiple keywords', () => {
       const response = 'Compare Wireless Headphones and Gaming Laptop for best performance.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(2);
-      expect(mentions[0].product.name).toBe('Wireless Headphones');
-      expect(mentions[1].product.name).toBe('Gaming Laptop');
+      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
+      expect(mentions[1].keyword.name).toBe('Gaming Laptop');
     });
 
     it('should be case insensitive', () => {
       const response = 'The WIRELESS HEADPHONES are great.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].product.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
     });
 
     it('should handle no matches', () => {
       const response = 'I recommend tablets and phones.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(0);
     });
 
     it('should extract context around mention', () => {
       const response = 'You should definitely buy the Wireless Headphones because they have great sound quality.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].context).toContain('Wireless Headphones');
@@ -69,22 +69,22 @@ describe('Product Detection (Mocked)', () => {
 
     it('should sort mentions by position', () => {
       const response = 'The Gaming Laptop beats Wireless Headphones in performance.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(2);
       expect(mentions[0].position).toBeLessThan(mentions[1].position);
     });
 
-    it('should only mention each product once', () => {
+    it('should only mention each keyword once', () => {
       const response = 'Wireless Headphones and Wireless Headphones again';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
     });
 
     it('should detect sentiment - positive', () => {
       const response = 'The Wireless Headphones are excellent and amazing!';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].sentiment).toBe('positive');
@@ -92,7 +92,7 @@ describe('Product Detection (Mocked)', () => {
 
     it('should detect sentiment - negative', () => {
       const response = 'The Wireless Headphones are terrible and disappointing.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].sentiment).toBe('negative');
@@ -100,7 +100,7 @@ describe('Product Detection (Mocked)', () => {
 
     it('should detect sentiment - neutral', () => {
       const response = 'The Wireless Headphones are available in black.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].sentiment).toBe('neutral');
@@ -108,7 +108,7 @@ describe('Product Detection (Mocked)', () => {
 
     it('should handle mixed sentiment as neutral', () => {
       const response = 'The Wireless Headphones are great but have poor battery.';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].sentiment).toBe('neutral');
@@ -116,62 +116,62 @@ describe('Product Detection (Mocked)', () => {
 
     it('should detect keyword match with sentiment', () => {
       const response = 'This bluetooth device is fantastic!';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].product.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
       expect(mentions[0].sentiment).toBe('positive');
     });
 
     it('should handle empty keywords array', () => {
-      const productWithoutKeywords = {
+      const keywordWithoutKeywords = {
         _id: '3',
         name: 'Tablet',
         description: 'A tablet device',
         keywords: [],
       };
       const response = 'Get a Tablet today';
-      const mentions = detectProductMentions(response, [productWithoutKeywords]);
+      const mentions = detectKeywordMentions(response, [keywordWithoutKeywords]);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].product.name).toBe('Tablet');
+      expect(mentions[0].keyword.name).toBe('Tablet');
     });
 
     it('should handle very short response', () => {
       const response = 'Tablet';
-      const mentions = detectProductMentions(response, mockProducts);
+      const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(0);
     });
   });
 
-  describe('highlightProductMentions', () => {
-    it('should highlight product name', () => {
+  describe('highlightKeywordMentions', () => {
+    it('should highlight keyword name', () => {
       const mentions = [
         {
-          product: mockProducts[0],
+          keyword: mockKeywords[0],
           position: 19,
           sentiment: 'positive' as const,
           context: 'the Wireless Headphones for',
         },
       ];
       const response = 'I recommend the Wireless Headphones for music.';
-      const highlighted = highlightProductMentions(response, mentions);
+      const highlighted = highlightKeywordMentions(response, mentions);
 
       expect(highlighted).toContain('**Wireless Headphones**');
     });
 
-    it('should highlight product keywords', () => {
+    it('should highlight keyword keywords', () => {
       const mentions = [
         {
-          product: mockProducts[0],
+          keyword: mockKeywords[0],
           position: 10,
           sentiment: 'positive' as const,
           context: 'This bluetooth device',
         },
       ];
       const response = 'This bluetooth device is great';
-      const highlighted = highlightProductMentions(response, mentions);
+      const highlighted = highlightKeywordMentions(response, mentions);
 
       expect(highlighted).toContain('**bluetooth**');
     });
@@ -179,28 +179,28 @@ describe('Product Detection (Mocked)', () => {
     it('should highlight multiple mentions', () => {
       const mentions = [
         {
-          product: mockProducts[0],
+          keyword: mockKeywords[0],
           position: 19,
           sentiment: 'positive' as const,
           context: 'Wireless Headphones',
         },
         {
-          product: mockProducts[1],
+          keyword: mockKeywords[1],
           position: 45,
           sentiment: 'neutral' as const,
           context: 'Gaming Laptop',
         },
       ];
       const response = 'Compare Wireless Headphones and Gaming Laptop';
-      const highlighted = highlightProductMentions(response, mentions);
+      const highlighted = highlightKeywordMentions(response, mentions);
 
       expect(highlighted).toContain('**Wireless Headphones**');
       expect(highlighted).toContain('**Gaming Laptop**');
     });
 
     it('should handle response with no mentions', () => {
-      const response = 'No products mentioned here';
-      const highlighted = highlightProductMentions(response, []);
+      const response = 'No keywords mentioned here';
+      const highlighted = highlightKeywordMentions(response, []);
 
       expect(highlighted).toBe(response);
     });

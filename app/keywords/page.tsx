@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
-import { trackDeleteProduct } from '@/lib/ganalytics';
+import { trackDeleteKeyword } from '@/lib/ganalytics';
 
-interface Product {
+interface Keyword {
   _id: string;
   name: string;
   description: string;
@@ -15,8 +15,8 @@ interface Product {
   keywords: string[];
 }
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+export default function KeywordsPage() {
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -25,7 +25,7 @@ export default function ProductsPage() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        fetchProducts(user);
+        fetchKeywords(user);
       } else {
         setLoading(false);
       }
@@ -34,10 +34,10 @@ export default function ProductsPage() {
     return () => unsubscribe();
   }, []);
 
-  const fetchProducts = async (currentUser: any) => {
+  const fetchKeywords = async (currentUser: any) => {
     try {
       const token = await currentUser.getIdToken();
-      const response = await fetch('/api/products', {
+      const response = await fetch('/api/keywords', {
         headers: {
           'x-firebase-uid': currentUser.uid,
           Authorization: `Bearer ${token}`,
@@ -46,33 +46,33 @@ export default function ProductsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        setKeywords(data);
         setError('');
       } else {
         const errorMessage = response.status === 401
           ? 'Your session has expired. Please sign in again.'
-          : 'Failed to load products. Please refresh the page.';
+          : 'Failed to load keywords. Please refresh the page.';
         setError(errorMessage);
-        setProducts([]);
+        setKeywords([]);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to load products. Please check your connection.');
-      setProducts([]);
+      console.error('Error fetching keywords:', error);
+      setError('Failed to load keywords. Please check your connection.');
+      setKeywords([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const productToDelete = products.find(p => p._id === id);
-    if (!confirm('Are you sure you want to delete this product?')) {
+    const keywordToDelete = keywords.find(k => k._id === id);
+    if (!confirm('Are you sure you want to delete this keyword?')) {
       return;
     }
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`/api/keywords/${id}`, {
         method: 'DELETE',
         headers: {
           'x-firebase-uid': user.uid,
@@ -81,16 +81,16 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        if (productToDelete) {
-          trackDeleteProduct(productToDelete.name, productToDelete.category);
+        if (keywordToDelete) {
+          trackDeleteKeyword(keywordToDelete.name, keywordToDelete.category);
         }
-        setProducts(products.filter((p) => p._id !== id));
+        setKeywords(keywords.filter((k) => k._id !== id));
       } else {
-        alert('Failed to delete product. Please try again.');
+        alert('Failed to delete keyword. Please try again.');
       }
     } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Failed to delete product. Please check your connection and try again.');
+      console.error('Error deleting keyword:', error);
+      alert('Failed to delete keyword. Please check your connection and try again.');
     }
   };
 
@@ -106,14 +106,14 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="mt-2 text-gray-600">Manage your product catalog</p>
+          <h1 className="text-3xl font-bold text-gray-900">Keywords</h1>
+          <p className="mt-2 text-gray-600">Manage your keyword catalog</p>
         </div>
         <Link
-          href="/products/new"
+          href="/keywords/new"
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          Add Product
+          Add Keyword
         </Link>
       </div>
 
@@ -123,7 +123,7 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {products.length === 0 && !error ? (
+      {keywords.length === 0 && !error ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
@@ -138,44 +138,44 @@ export default function ProductsPage() {
               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No products</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No keywords</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Get started by adding your first product.
+            Get started by adding your first keyword.
           </p>
           <div className="mt-6">
             <Link
-              href="/products/new"
+              href="/keywords/new"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
             >
-              Add Product
+              Add Keyword
             </Link>
           </div>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
+          {keywords.map((keyword) => (
             <div
-              key={product._id}
+              key={keyword._id}
               className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-500">{product.category}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{keyword.name}</h3>
+                  <p className="text-sm text-gray-500">{keyword.category}</p>
                 </div>
-                <p className="text-lg font-bold text-indigo-600">${product.price}</p>
+                <p className="text-lg font-bold text-indigo-600">${keyword.price}</p>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{keyword.description}</p>
 
-              {product.keywords.length > 0 && (
+              {keyword.keywords.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {product.keywords.map((keyword, index) => (
+                  {keyword.keywords.map((kw, index) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                     >
-                      {keyword}
+                      {kw}
                     </span>
                   ))}
                 </div>
@@ -183,13 +183,13 @@ export default function ProductsPage() {
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <Link
-                  href={`/products/${product._id}/edit`}
+                  href={`/keywords/${keyword._id}/edit`}
                   className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
                 >
                   Edit
                 </Link>
                 <button
-                  onClick={() => handleDelete(product._id)}
+                  onClick={() => handleDelete(keyword._id)}
                   className="text-red-600 hover:text-red-700 text-sm font-medium"
                 >
                   Delete

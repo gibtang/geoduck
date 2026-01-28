@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model, Document, Types } from 'mongoose';
 
-export interface IProduct extends Document {
+export interface IKeyword extends Document {
   name: string;
   description: string;
   category: string;
@@ -11,7 +11,7 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-const ProductSchema: Schema = new Schema(
+const KeywordSchema: Schema = new Schema(
   {
     name: {
       type: String,
@@ -46,9 +46,9 @@ const ProductSchema: Schema = new Schema(
   }
 );
 
-ProductSchema.index({ user: 1, category: 1 });
-ProductSchema.index({ keywords: 1 });
+KeywordSchema.index({ user: 1, category: 1 });
+KeywordSchema.index({ keywords: 1 });
 
-const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+const Keyword: Model<IKeyword> = mongoose.models.Keyword || mongoose.model<IKeyword>('Keyword', KeywordSchema);
 
-export default Product;
+export default Keyword;
