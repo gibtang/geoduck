@@ -11,7 +11,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link href="/products">
+        <Link href="/keywords">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -30,7 +30,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Products</h3>
+            <h3 className="text-lg font-semibold mb-2">Keywords</h3>
             <p className="text-sm text-gray-600">
               Manage your keyword catalog
             </p>
@@ -119,10 +119,10 @@ export default function DashboardPage() {
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
-          <li>Add your products to the catalog</li>
+          <li>Add your keywords to the catalog</li>
           <li>Create prompts that simulate user queries</li>
           <li>Execute prompts against different LLMs</li>
-          <li>Review results to see if your products are mentioned</li>
+          <li>Review results to see if your keywords are mentioned</li>
         </ol>
       </div>
     </div>

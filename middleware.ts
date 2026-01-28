@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/signin', request.url));
   }
 
-  if (!token && pathname.startsWith('/products')) {
+  if (!token && pathname.startsWith('/keywords')) {
     return NextResponse.redirect(new URL('/signin', request.url));
   }
 
