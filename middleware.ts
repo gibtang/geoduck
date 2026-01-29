@@ -24,10 +24,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/signin', request.url));
   }
 
-  if (!token && pathname.startsWith('/execute')) {
-    return NextResponse.redirect(new URL('/signin', request.url));
-  }
-
   if (!token && pathname.startsWith('/results')) {
     return NextResponse.redirect(new URL('/signin', request.url));
   }
