@@ -16,8 +16,8 @@ export function detectKeywordMentions(
 
   keywords.forEach((keyword) => {
     const keywordName = keyword.name.toLowerCase();
-    const keywordTerms = keyword.keywords.map((k: string) => k.toLowerCase());
-    const allSearchTerms = [keywordName, ...keywordTerms];
+    // Search only by keyword name (keywords field was removed in refactor)
+    const allSearchTerms = [keywordName];
 
     for (const term of allSearchTerms) {
       const index = responseLower.indexOf(term);
@@ -100,9 +100,8 @@ export function highlightKeywordMentions(
 
   mentions.forEach((mention) => {
     const keywordName = mention.keyword.name;
-    const keywordTerms = mention.keyword.keywords;
-
-    const regex = new RegExp(`(${keywordName}|${keywordTerms.join('|')})`, 'gi');
+    // Highlight keyword name only (keywords field was removed in refactor)
+    const regex = new RegExp(`(${keywordName})`, 'gi');
 
     highlightedResponse = highlightedResponse.replace(regex, '**$1**');
   });

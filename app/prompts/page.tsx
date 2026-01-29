@@ -6,12 +6,20 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
 import EditPromptModal from '@/components/EditPromptModal';
+import ResultsMatrixView from '@/components/ResultsMatrixView';
 
 interface Prompt {
   _id: string;
   title: string;
   content: string;
   createdAt: string;
+}
+
+interface Keyword {
+  _id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PromptExecutionState {
@@ -32,6 +40,8 @@ const AVAILABLE_MODELS = [
 
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [selectedKeywordIds, setSelectedKeywordIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [executionStates, setExecutionStates] = useState<Record<string, PromptExecutionState>>({});
@@ -43,6 +53,7 @@ export default function PromptsPage() {
       setUser(user);
       if (user) {
         fetchPrompts(user);
+        fetchKeywords(user);
       } else {
         setLoading(false);
       }
@@ -69,6 +80,27 @@ export default function PromptsPage() {
       console.error('Error fetching prompts:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchKeywords = async (currentUser: any) => {
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/keywords', {
+        headers: {
+          'x-firebase-uid': currentUser.uid,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setKeywords(data);
+        // Default to all keywords selected
+        setSelectedKeywordIds(data.map((k: Keyword) => k._id));
+      }
+    } catch (error) {
+      console.error('Error fetching keywords:', error);
     }
   };
 
@@ -133,6 +165,15 @@ export default function PromptsPage() {
     });
   };
 
+  const toggleKeyword = (keywordId: string) => {
+    setSelectedKeywordIds(prev => {
+      const isSelected = prev.includes(keywordId);
+      return isSelected
+        ? prev.filter(id => id !== keywordId)
+        : [...prev, keywordId];
+    });
+  };
+
   const toggleExpand = (promptId: string) => {
     setExecutionStates(prev => ({
       ...prev,
@@ -169,6 +210,7 @@ export default function PromptsPage() {
           promptId,
           llmModel: 'google/gemini-2.0-flash-exp:free',
           comparisonModels: state.comparisonModels,
+          selectedKeywordIds,
         }),
       });
 
@@ -304,6 +346,38 @@ export default function PromptsPage() {
                     </div>
                   </div>
 
+                  {/* Keyword Selection Section */}
+                  {keywords.length > 0 && (
+                    <div className="mb-4">
+                      <span className="block text-xs font-semibold text-gray-600 mb-2">
+                        Track keywords ({selectedKeywordIds.length}/{keywords.length}):
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords.map((keyword) => (
+                          <div key={keyword._id} className="relative">
+                            <input
+                              type="checkbox"
+                              id={`keyword-${prompt._id}-${keyword._id}`}
+                              checked={selectedKeywordIds.includes(keyword._id)}
+                              onChange={() => toggleKeyword(keyword._id)}
+                              className="sr-only"
+                            />
+                            <label
+                              htmlFor={`keyword-${prompt._id}-${keyword._id}`}
+                              className={`inline-block px-3 py-1.5 text-xs font-medium rounded-full border-2 cursor-pointer transition-all ${
+                                selectedKeywordIds.includes(keyword._id)
+                                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-emerald-400'
+                              }`}
+                            >
+                              {keyword.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Execute Button */}
                   <button
                     onClick={() => handleExecute(prompt._id, prompt.title)}
@@ -364,56 +438,7 @@ export default function PromptsPage() {
 
                     {state.isExpanded && (
                       <div className="px-6 py-4 border-t border-gray-200">
-                        <div className="flex flex-col gap-4">
-                          {state.results.map((result: any, index: number) => (
-                            <div
-                              key={index}
-                              className={`p-4 rounded-lg border-l-4 ${
-                                index === 0
-                                  ? 'bg-indigo-50 border-indigo-500'
-                                  : 'bg-orange-50 border-orange-400'
-                              }`}
-                            >
-                              <div className="flex justify-between items-start mb-3">
-                                <span className="font-semibold text-sm text-gray-900">
-                                  {index === 0 ? '🎯 Primary Model' : '⚖️ Comparison'}: {result.llmModel}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {new Date(result.createdAt).toLocaleString()}
-                                </span>
-                              </div>
-
-                              <p className="text-sm text-gray-700 leading-relaxed mb-3 line-clamp-4">
-                                {result.response}
-                              </p>
-
-                              {/* Keywords Mentioned */}
-                              {result.keywordsMentioned && result.keywordsMentioned.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs font-semibold text-gray-600 mb-2">
-                                    Keywords Detected: {result.keywordsMentioned.length}
-                                  </p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {result.keywordsMentioned.map((mention: any, idx: number) => (
-                                      <span
-                                        key={idx}
-                                        className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
-                                          mention.sentiment === 'positive'
-                                            ? 'bg-green-100 text-green-800 border border-green-300'
-                                            : mention.sentiment === 'negative'
-                                            ? 'bg-red-100 text-red-800 border border-red-300'
-                                            : 'bg-gray-100 text-gray-800 border border-gray-300'
-                                        }`}
-                                      >
-                                        {mention.keyword?.name || 'Unknown'}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        <ResultsMatrixView results={state.results} keywords={keywords} />
                       </div>
                     )}
                   </div>
