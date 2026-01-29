@@ -30,7 +30,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Keywords</h3>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Keywords</h3>
             <p className="text-sm text-gray-600">
               Manage your keyword catalog
             </p>
@@ -56,7 +56,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Prompts</h3>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Prompts</h3>
             <p className="text-sm text-gray-600">
               Create and manage test prompts
             </p>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Execute</h3>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Execute</h3>
             <p className="text-sm text-gray-600">
               Run prompts against LLMs
             </p>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Results</h3>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Results</h3>
             <p className="text-sm text-gray-600">
               View past results and analysis
             </p>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">Getting Started</h2>
         <ol className="list-decimal list-inside space-y-2 text-gray-700">
           <li>Add your keywords to the catalog</li>
           <li>Create prompts that simulate user queries</li>
