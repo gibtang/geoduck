@@ -5,16 +5,28 @@ import { serverEnv } from './env';
 const openrouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: serverEnv.OPENROUTER_API_KEY,
+  headers: {
+    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'X-Title': 'Geoduck',
+  },
 });
 
+// Debug logging (remove in production)
+if (process.env.NODE_ENV === 'test') {
+  console.log('[openrouter] API Key loaded:', {
+    hasKey: !!serverEnv.OPENROUTER_API_KEY,
+    keyLength: serverEnv.OPENROUTER_API_KEY?.length,
+    keyPrefix: serverEnv.OPENROUTER_API_KEY?.substring(0, 7) + '...',
+  });
+}
+
 export const AVAILABLE_MODELS = [
-  { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)' },
-  { id: 'google/gemini-pro', name: 'Gemini Pro' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Exp' },
+  { id: 'google/gemini-flash', name: 'Gemini Flash' },
   { id: 'openai/gpt-4o', name: 'GPT-4o' },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
   { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-  { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
-  { id: 'meta-llama/llama-3.1-70b-instruct:free', name: 'Llama 3.1 70B (Free)' },
 ] as const;
 
 export async function executePrompt(model: string, prompt: string) {

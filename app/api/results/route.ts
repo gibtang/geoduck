@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Result from '@/models/Result';
 import User from '@/models/User';
+import { getRetentionCutoff } from '@/lib/tierLimits';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,14 +30,25 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const skip = parseInt(searchParams.get('skip') || '0');
 
-    const results = await Result.find({ user: user._id })
+    // Apply data retention filter
+    const retentionCutoff = getRetentionCutoff(user);
+
+    const results = await Result.find({
+      user: user._id,
+      createdAt: { $gte: retentionCutoff },
+    })
       .populate('prompt')
       .populate('keywordsMentioned.keyword')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
 
-    return NextResponse.json(results);
+    const total = await Result.countDocuments({
+      user: user._id,
+      createdAt: { $gte: retentionCutoff },
+    });
+
+    return NextResponse.json({ results, total });
   } catch (error: any) {
     console.error('Error fetching results:', error);
     return NextResponse.json(

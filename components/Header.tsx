@@ -5,9 +5,40 @@ import { usePathname } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { trackLogout } from '@/lib/ganalytics';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check if user is admin by fetching user info
+    const checkAdmin = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('firebase-auth-token='))
+          ?.split('=')[1];
+
+        if (!token) return;
+
+        const response = await fetch('/api/user/info', {
+          headers: {
+            'x-firebase-uid': token,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.user?.isAdmin || false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdmin();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -27,6 +58,10 @@ export default function Header() {
     { href: '/prompts', label: 'Prompts' },
     { href: '/results', label: 'Results' },
   ];
+
+  if (isAdmin) {
+    navLinks.push({ href: '/admin', label: 'Admin' });
+  }
 
   return (
     <header className="bg-white shadow-sm border-b">
