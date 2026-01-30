@@ -6,6 +6,7 @@ import Prompt from '@/models/Prompt';
 import Result from '@/models/Result';
 import { executePromptNonStreaming, AVAILABLE_MODELS } from '@/lib/openrouter';
 import { detectKeywordMentions } from '@/lib/keywordDetection';
+import { canExecute, formatRetryAfter } from '@/lib/tierLimits';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +27,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
+      );
+    }
+
+    // Check rate limit
+    const rateLimitCheck = canExecute(user);
+    if (!rateLimitCheck.allowed) {
+      const retryAfter = rateLimitCheck.retryAfter!;
+      const timeUntilRetry = formatRetryAfter(retryAfter);
+      return NextResponse.json(
+        {
+          error: `Rate limit exceeded. You can execute your next prompt in ${timeUntilRetry}.`,
+          retryAfter: retryAfter.toISOString(),
+        },
+        { status: 429 }
       );
     }
 
@@ -162,6 +177,9 @@ export async function POST(request: NextRequest) {
     }
     console.log('========================\n');
     // === END DEBUG RESULTS ===
+
+    // Update user's last execution time
+    await User.findByIdAndUpdate(user._id, { lastExecutionAt: new Date() });
 
     return NextResponse.json({ results }, { status: 201 });
   } catch (error: any) {
