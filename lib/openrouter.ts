@@ -16,19 +16,16 @@ function getOpenRouterClient() {
 }
 
 export const AVAILABLE_MODELS = [
-  // Free models (no cost)
-  { id: 'openrouter/free', name: 'Free Router (Random Free Model)' },
-  { id: 'stepfun/step-3.5-flash:free', name: 'StepFun 3.5 Flash (Free)' },
-  { id: 'google/gemma-3-27b-it:free', name: 'Gemma 3 27B (Free)' },
-  { id: 'meta-llama/llama-3.1-8b-instruct:free', name: 'Llama 3.1 8B (Free)' },
-  { id: 'meta-llama/llama-3.1-70b-instruct:free', name: 'Llama 3.1 70B (Free)' },
-  { id: 'nvidia/nemotron-3-nano-30b-a3b:free', name: 'Nemotron 3 Nano 30B (Free)' },
-  // Popular paid models
+  // OpenAI models
   { id: 'openai/gpt-4o', name: 'GPT-4o' },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+  { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo' },
   { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  // Anthropic models
   { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
   { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
+  { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus' },
+  // Google models
   { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
   { id: 'google/gemini-pro', name: 'Gemini Pro' },
 ] as const;
