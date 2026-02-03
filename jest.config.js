@@ -16,6 +16,9 @@ const customJestConfig = {
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.test.tsx',
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/__tests__/.*\\.integration\\.test\\.ts$',
+  ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',
     'components/**/*.{js,jsx,ts,tsx}',
