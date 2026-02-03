@@ -9,5 +9,11 @@ process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = 'test-project'
 process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = 'test.appspot.com'
 process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = '123456789'
 process.env.NEXT_PUBLIC_FIREBASE_APP_ID = '1:123456789:web:abcdef'
-process.env.OPENROUTER_API_KEY = 'test-openrouter-key'
+process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID = 'G-XXXXXXXXXX'
+
+// Only set test API key if real key not already loaded (for integration tests)
+if (!process.env.OPENROUTER_API_KEY || !process.env.OPENROUTER_API_KEY.startsWith('sk-or-v1-')) {
+  process.env.OPENROUTER_API_KEY = 'test-openrouter-key'
+}
+
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
