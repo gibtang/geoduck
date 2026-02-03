@@ -113,7 +113,7 @@ function KeywordFilter({ keywords, hiddenKeywordIds, onToggle }: any) {
     <div className="flex items-center gap-4">
       <span className="text-xs font-semibold text-gray-600">Filter:</span>
       <div className="flex flex-wrap gap-2">
-        {keywords.map(keyword => (
+        {keywords.map((keyword: any) => (
           <label key={keyword._id} className="inline-flex items-center">
             <input
               type="checkbox"
