@@ -16,16 +16,21 @@ function getOpenRouterClient() {
 }
 
 export const AVAILABLE_MODELS = [
-  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  // OpenAI
   { id: 'openai/gpt-4o', name: 'GPT-4o' },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
   { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo' },
   { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  // Anthropic (Claude)
   { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
   { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
   { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus' },
+  // Google (Gemini)
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
   { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
   { id: 'google/gemini-pro', name: 'Gemini Pro' },
+  // xAI (Grok)
+  { id: 'x-ai/grok-2', name: 'Grok-2' },
 ] as const;
 
 export async function executePrompt(model: string, prompt: string) {

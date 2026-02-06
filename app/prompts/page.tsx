@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
 import EditPromptModal from '@/components/EditPromptModal';
 import ResultsMatrixView from '@/components/ResultsMatrixView';
+import { AVAILABLE_MODELS } from '@/lib/openrouter';
 
 interface Prompt {
   _id: string;
@@ -29,14 +30,6 @@ interface PromptExecutionState {
   error: string;
   isExpanded: boolean;
 }
-
-const AVAILABLE_MODELS = [
-  { id: 'openai/gpt-4o', name: 'GPT-4o' },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
-  { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B' },
-  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-];
 
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);

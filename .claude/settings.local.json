@@ -18,7 +18,15 @@
       "Bash(vercel inspect:*)",
       "Bash(vercel logs:*)",
       "Bash(find:*)",
-      "SlashCommand(/commit-commands:commit)"
+      "SlashCommand(/commit-commands:commit)",
+      "Bash(rm:*)",
+      "Bash(npm run dev:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__new_page"
     ],
     "deny": [],
     "ask": []

@@ -115,41 +115,46 @@ export async function POST(request: NextRequest) {
       createdAt: result.createdAt,
     });
 
-    // THEN execute comparison models if provided
+    // THEN execute comparison models in parallel if provided
     if (comparisonModels && comparisonModels.length > 0) {
-      console.log('  → Executing comparison models:', comparisonModels);
-      for (const modelName of comparisonModels) {
-        console.log(`    → Executing: ${modelName}`);
-        const compResponse = await executePromptNonStreaming(modelName, prompt);
-        const compFullResponse = await compResponse.text;
+      console.log('  → Executing comparison models in parallel:', comparisonModels);
 
-        const compKeywordMentions = detectKeywordMentions(compFullResponse, keywords);
+      const comparisonResults = await Promise.all(
+        comparisonModels.map(async (modelName) => {
+          console.log(`    → Executing: ${modelName}`);
+          const compResponse = await executePromptNonStreaming(modelName, prompt);
+          const compFullResponse = await compResponse.text;
 
-        const compResult = await Result.create({
-          prompt: promptDoc?._id || null,
-          llmModel: modelName,
-          response: compFullResponse,
-          keywordsMentioned: compKeywordMentions.map((mention) => ({
-            keyword: mention.keyword._id,
-            position: mention.position,
-            sentiment: mention.sentiment,
-            context: mention.context,
-          })),
-          user: user._id,
-        });
+          const compKeywordMentions = detectKeywordMentions(compFullResponse, keywords);
 
-        results.push({
-          _id: compResult._id,
-          llmModel: modelName,
-          response: compFullResponse,
-          keywordsMentioned: compKeywordMentions.map((km) => ({
-            ...km,
-            keywordId: km.keyword._id,
-            keywordName: km.keyword.name,
-          })),
-          createdAt: compResult.createdAt,
-        });
-      }
+          const compResult = await Result.create({
+            prompt: promptDoc?._id || null,
+            llmModel: modelName,
+            response: compFullResponse,
+            keywordsMentioned: compKeywordMentions.map((mention) => ({
+              keyword: mention.keyword._id,
+              position: mention.position,
+              sentiment: mention.sentiment,
+              context: mention.context,
+            })),
+            user: user._id,
+          });
+
+          return {
+            _id: compResult._id,
+            llmModel: modelName,
+            response: compFullResponse,
+            keywordsMentioned: compKeywordMentions.map((km) => ({
+              ...km,
+              keywordId: km.keyword._id,
+              keywordName: km.keyword.name,
+            })),
+            createdAt: compResult.createdAt,
+          };
+        })
+      );
+
+      results.push(...comparisonResults);
     }
 
     // === DEBUG RESULTS ===
