@@ -1,8 +1,14 @@
-import { createRequest, createResponse } from 'node-mocks-http';
 import { GET, POST } from '@/app/api/prompts/route';
 import { connect, closeDatabase, clearDatabase } from '../utils/mongodb';
 import User from '@/models/User';
 import Prompt from '@/models/Prompt';
+import { NextRequest } from 'next/server';
+
+// Mock the database connection to avoid reconnecting with different URI
+jest.mock('@/lib/mongodb', () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('Prompts API', () => {
   let userId: string;
@@ -41,56 +47,50 @@ describe('Prompts API', () => {
         user: userId,
       });
 
-      const request = createRequest({
-        method: 'GET',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => (name === 'x-firebase-uid' ? firebaseUid : null),
         },
-      });
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await GET(request);
 
-      await GET(request as any, response as any);
+      expect(response.status).toBe(200);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(200);
+      const data = await response.json();
       expect(data).toHaveLength(2);
-      expect(data[0].title).toBe('Prompt 1');
-      expect(data[1].title).toBe('Prompt 2');
+      // Prompts are sorted by createdAt descending, so Prompt 2 (newer) comes first
+      expect(data[0].title).toBe('Prompt 2');
+      expect(data[1].title).toBe('Prompt 1');
     });
 
     it('should return empty array for user with no prompts', async () => {
-      const request = createRequest({
-        method: 'GET',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => (name === 'x-firebase-uid' ? firebaseUid : null),
         },
-      });
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await GET(request);
 
-      await GET(request as any, response as any);
+      expect(response.status).toBe(200);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(200);
+      const data = await response.json();
       expect(data).toEqual([]);
     });
 
     it('should return 401 without firebase uid', async () => {
-      const request = createRequest({
-        method: 'GET',
-        headers: {},
-      });
+      const request = {
+        headers: {
+          get: (name: string) => null,
+        },
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await GET(request);
 
-      await GET(request as any, response as any);
+      expect(response.status).toBe(401);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(401);
+      const data = await response.json();
       expect(data.error).toBe('Unauthorized');
     });
   });
@@ -99,24 +99,21 @@ describe('Prompts API', () => {
     it('should create a new prompt', async () => {
       const promptData = {
         title: 'New Prompt',
-        content: 'What are the best products?',
+        content: 'What are the best keywords?',
       };
 
-      const request = createRequest({
-        method: 'POST',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => (name === 'x-firebase-uid' ? firebaseUid : null),
         },
-        body: promptData,
-      });
+        json: async () => promptData,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(201);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(201);
+      const data = await response.json();
       expect(data.title).toBe(promptData.title);
       expect(data.content).toBe(promptData.content);
     });
@@ -126,21 +123,18 @@ describe('Prompts API', () => {
         title: 'New Prompt',
       };
 
-      const request = createRequest({
-        method: 'POST',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => (name === 'x-firebase-uid' ? firebaseUid : null),
         },
-        body: promptData,
-      });
+        json: async () => promptData,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(400);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(400);
+      const data = await response.json();
       expect(data.error).toBe('Missing required fields');
     });
 
@@ -150,19 +144,18 @@ describe('Prompts API', () => {
         content: 'Content',
       };
 
-      const request = createRequest({
-        method: 'POST',
-        headers: {},
-        body: promptData,
-      });
+      const request = {
+        headers: {
+          get: (name: string) => null,
+        },
+        json: async () => promptData,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(401);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(401);
+      const data = await response.json();
       expect(data.error).toBe('Unauthorized');
     });
   });

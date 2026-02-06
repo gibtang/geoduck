@@ -19,7 +19,14 @@ if (!global.mongoose) {
 }
 
 async function connectDB() {
+  // If already connected, return the connection
   if (cached.conn) {
+    return cached.conn;
+  }
+
+  // If mongoose is already connected (e.g., in tests with in-memory DB), use that connection
+  if (mongoose.connection.readyState === 1) {
+    cached.conn = mongoose;
     return cached.conn;
   }
 

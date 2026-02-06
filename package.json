@@ -14,8 +14,6 @@
     "validate-models": "node scripts/validate-models.js"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.12",
-    "ai": "^6.0.39",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "firebase": "^12.8.0",

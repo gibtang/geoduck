@@ -46,30 +46,30 @@ export const trackLogout = () => {
   trackEvent('logout', 'authentication');
 };
 
-// Product Management Events
-export const trackCreateProduct = (productName: string, category?: string) => {
-  trackEvent('create_product', 'product_management', category || 'uncategorized');
+// Keyword Management Events
+export const trackCreateKeyword = (keywordName: string) => {
+  trackEvent('create_keyword', 'keyword_management', keywordName);
 };
 
-export const trackUpdateProduct = (productName: string, category?: string) => {
-  trackEvent('update_product', 'product_management', category || 'uncategorized');
+export const trackUpdateKeyword = (keywordName: string) => {
+  trackEvent('update_keyword', 'keyword_management', keywordName);
 };
 
-export const trackDeleteProduct = (productName: string, category?: string) => {
-  trackEvent('delete_product', 'product_management', category || 'uncategorized');
+export const trackDeleteKeyword = (keywordName: string) => {
+  trackEvent('delete_keyword', 'keyword_management', keywordName);
 };
 
 // Prompt Management Events
-export const trackCreatePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('create_prompt', 'prompt_management', category || 'uncategorized');
+export const trackCreatePrompt = (promptTitle: string) => {
+  trackEvent('create_prompt', 'prompt_management', promptTitle);
 };
 
-export const trackUpdatePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('update_prompt', 'prompt_management', category || 'uncategorized');
+export const trackUpdatePrompt = (promptTitle: string) => {
+  trackEvent('update_prompt', 'prompt_management', promptTitle);
 };
 
-export const trackDeletePrompt = (promptTitle: string, category?: string) => {
-  trackEvent('delete_prompt', 'prompt_management', category || 'uncategorized');
+export const trackDeletePrompt = (promptTitle: string) => {
+  trackEvent('delete_prompt', 'prompt_management', promptTitle);
 };
 
 // Execution Events
@@ -90,12 +90,12 @@ export const trackExecutePrompt = (
   );
 };
 
-export const trackProductMentioned = (
-  productName: string,
+export const trackKeywordMentioned = (
+  keywordName: string,
   modelName: string,
   sentiment: string
 ) => {
-  trackEvent('product_mentioned', 'ai_response', `${modelName} - ${sentiment}`);
+  trackEvent('keyword_mentioned', 'ai_response', `${modelName} - ${sentiment}`);
 };
 
 // Page View Tracking for Custom Pages

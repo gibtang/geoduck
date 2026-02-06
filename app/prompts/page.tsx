@@ -3,11 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
-import { useAuth } from '@/components/AuthContext';
-import { AVAILABLE_MODELS } from '@/lib/openrouter';
-import PromptEditModal from '@/components/PromptEditModal';
-import PromptDeleteConfirmModal from '@/components/PromptDeleteConfirmModal';
-import QuickTestModal from '@/components/QuickTestModal';
+import EditPromptModal from '@/components/EditPromptModal';
+import ResultsMatrixView from '@/components/ResultsMatrixView';
 
 interface Prompt {
   _id: string;
@@ -16,32 +13,38 @@ interface Prompt {
   createdAt: string;
 }
 
-interface ExecutionResult {
+interface Keyword {
   _id: string;
-  model: string;
-  response: string;
-  productsMentioned: Array<{
-    productId: string;
-    productName: string;
-    position: number;
-    sentiment: string;
-    context: string;
-  }>;
+  name: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-interface ExecutionHistory {
-  [promptId: string]: ExecutionResult[];
+interface PromptExecutionState {
+  comparisonModels: string[];
+  isLoading: boolean;
+  results: any;
+  error: string;
+  isExpanded: boolean;
 }
 
-interface ExpandedCards {
-  [promptId: string]: boolean;
-}
+const AVAILABLE_MODELS = [
+  { id: 'openai/gpt-4o', name: 'GPT-4o' },
+  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+  { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+  { id: 'meta-llama/llama-3.3-70b', name: 'Llama 3.3 70B' },
+  { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+];
 
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [selectedKeywordIds, setSelectedKeywordIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [executionStates, setExecutionStates] = useState<Record<string, PromptExecutionState>>({});
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [promptToEdit, setPromptToEdit] = useState<Prompt | null>(null);
 
   // Inline expansion state
   const [selectedModels, setSelectedModels] = useState<{ [promptId: string]: string[] }>({});
@@ -60,10 +63,15 @@ export default function PromptsPage() {
 
   // Load last selected model and execution history from localStorage
   useEffect(() => {
-    const savedModel = localStorage.getItem('lastSelectedModel');
-    if (savedModel) {
-      setLastSelectedModel(savedModel);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user) {
+        fetchPrompts(user);
+        fetchKeywords(user);
+      } else {
+        setLoading(false);
+      }
+    });
 
     const savedHistory = localStorage.getItem('executionHistory');
     if (savedHistory) {
@@ -126,6 +134,44 @@ export default function PromptsPage() {
     }
   };
 
+  const fetchKeywords = async (currentUser: any) => {
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/keywords', {
+        headers: {
+          'x-firebase-uid': currentUser.uid,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setKeywords(data);
+        // Default to all keywords selected
+        setSelectedKeywordIds(data.map((k: Keyword) => k._id));
+      }
+    } catch (error) {
+      console.error('Error fetching keywords:', error);
+    }
+  };
+
+  const handleEditClick = (prompt: Prompt) => {
+    setPromptToEdit(prompt);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setPromptToEdit(null);
+  };
+
+  const handlePromptUpdated = () => {
+    // Refresh prompts list after update
+    if (user) {
+      fetchPrompts(user);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!user) return;
 
@@ -149,16 +195,10 @@ export default function PromptsPage() {
       });
 
       if (response.ok) {
-        trackDeletePrompt(deletingPrompt.title);
-        setPrompts(prompts.filter((p) => p._id !== deletingPrompt._id));
-        setDeletingPrompt(null);
-
-        // Remove execution history for this prompt
-        const newHistory = { ...executionHistory };
-        delete newHistory[deletingPrompt._id];
-        setExecutionHistory(newHistory);
-      } else {
-        throw new Error('Failed to delete prompt');
+        if (promptToDelete) {
+          trackDeletePrompt(promptToDelete.title);
+        }
+        setPrompts(prompts.filter((p) => p._id !== id));
       }
     } catch (error) {
       console.error('Error deleting prompt:', error);
@@ -166,239 +206,99 @@ export default function PromptsPage() {
     }
   };
 
-  const openEditModal = (prompt: Prompt) => {
-    setEditingPrompt(prompt);
+  const toggleModel = (promptId: string, modelId: string) => {
+    setExecutionStates(prev => {
+      const currentState = prev[promptId] || { comparisonModels: [], isLoading: false, results: null, error: '', isExpanded: false };
+      const isSelected = currentState.comparisonModels.includes(modelId);
+
+      return {
+        ...prev,
+        [promptId]: {
+          ...currentState,
+          comparisonModels: isSelected
+            ? currentState.comparisonModels.filter(m => m !== modelId)
+            : [...currentState.comparisonModels, modelId]
+        }
+      };
+    });
   };
 
-  const closeEditModal = () => {
-    setEditingPrompt(null);
+  const toggleKeyword = (keywordId: string) => {
+    setSelectedKeywordIds(prev => {
+      const isSelected = prev.includes(keywordId);
+      return isSelected
+        ? prev.filter(id => id !== keywordId)
+        : [...prev, keywordId];
+    });
   };
 
-  const closeDeleteModal = () => {
-    setDeletingPrompt(null);
+  const toggleExpand = (promptId: string) => {
+    setExecutionStates(prev => ({
+      ...prev,
+      [promptId]: {
+        ...prev[promptId],
+        isExpanded: !prev[promptId]?.isExpanded
+      }
+    }));
   };
 
-  const handleSaveEdit = async (data: { title: string; content: string }) => {
-    if (!user || !editingPrompt) return;
+  const handleExecute = async (promptId: string, promptTitle: string) => {
+    const state = executionStates[promptId] || { comparisonModels: [], isLoading: false, results: null, error: '', isExpanded: false };
+
+    setExecutionStates(prev => ({
+      ...prev,
+      [promptId]: {
+        ...state,
+        isLoading: true,
+        error: '',
+        results: null
+      }
+    }));
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/prompts/${editingPrompt._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-firebase-uid': user.uid,
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const updatedPrompt = await response.json();
-        // Optimistic update
-        setPrompts(prompts.map(p =>
-          p._id === updatedPrompt._id ? updatedPrompt : p
-        ));
-      } else {
-        throw new Error('Failed to save prompt');
-      }
-    } catch (error) {
-      console.error('Error saving prompt:', error);
-      throw error;
-    }
-  };
-
-  const handleQuickTestExecute = async (promptContent: string, model: string, compareModels: string[]) => {
-    if (!user) throw new Error('User not authenticated');
-
-    const token = await user.getIdToken();
-    const allModels = [model, ...compareModels];
-
-    // Execute models in parallel with staggered rate limiting
-    const executeModel = async (modelId: string, index: number) => {
-      // Add staggered delay to avoid rate limiting (500ms between each request)
-      if (index > 0) {
-        await new Promise(resolve => setTimeout(resolve, index * 500));
-      }
-
       const response = await fetch('/api/execute', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-firebase-uid': user.uid,
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          promptId: null,
-          promptContent: promptContent,
-          model: modelId,
-          compareModels: [],
+          promptId,
+          llmModel: 'google/gemini-2.0-flash-exp:free',
+          comparisonModels: state.comparisonModels,
+          selectedKeywordIds,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to execute model ${modelId}`);
+        throw new Error('Failed to execute prompt');
       }
 
       const data = await response.json();
-      return data.results;
-    };
 
-    // Execute all models in parallel (with staggered delays inside executeModel)
-    const resultsArray = await Promise.all(
-      allModels.map((modelId, index) => executeModel(modelId, index))
-    );
-
-    // Flatten and return results
-    return resultsArray.flat();
-  };
-
-  const handleSaveAsPrompt = async (title: string, content: string) => {
-    if (!user) throw new Error('User not authenticated');
-
-    const token = await user.getIdToken();
-    const response = await fetch('/api/prompts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-firebase-uid': user.uid,
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ title, content }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create prompt');
-    }
-
-    const newPrompt = await response.json();
-    // Add to prompts list
-    setPrompts(prev => [newPrompt, ...prev]);
-  };
-
-  const toggleExpand = (promptId: string) => {
-    setExpandedCards(prev => ({
-      ...prev,
-      [promptId]: !prev[promptId],
-    }));
-  };
-
-  const toggleModelComparison = (promptId: string, modelId: string) => {
-    setSelectedModels(prev => {
-      const promptModels = prev[promptId] || [];
-      return {
+      setExecutionStates(prev => ({
         ...prev,
-        [promptId]: promptModels.includes(modelId)
-          ? promptModels.filter(id => id !== modelId)
-          : [...promptModels, modelId],
-      };
-    });
-  };
-
-  const handleExecute = async (promptId: string) => {
-    if (!user) return;
-
-    setIsExecuting(prev => ({ ...prev, [promptId]: true }));
-
-    try {
-      const token = await user.getIdToken();
-
-      // Save selected model as last used
-      localStorage.setItem('lastSelectedModel', lastSelectedModel);
-
-      const comparisonModels = selectedModels[promptId] || [];
-      const allModels = [lastSelectedModel, ...comparisonModels];
-
-      // Execute models in parallel with staggered rate limiting
-      const executeModel = async (modelId: string, index: number) => {
-        // Add staggered delay to avoid rate limiting (500ms between each request)
-        if (index > 0) {
-          await new Promise(resolve => setTimeout(resolve, index * 500));
+        [promptId]: {
+          ...state,
+          isLoading: false,
+          results: data.results || [],
+          isExpanded: true
         }
+      }));
 
-        // Update current executing model for UI feedback
-        setCurrentExecutingModel(prev => ({ ...prev, [promptId]: modelId }));
-
-        const response = await fetch('/api/execute', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-firebase-uid': user.uid,
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            promptId,
-            model: modelId,
-            compareModels: [], // Execute one model at a time
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to execute model ${modelId}`);
+    } catch (err: any) {
+      console.error('Error executing prompt:', err);
+      setExecutionStates(prev => ({
+        ...prev,
+        [promptId]: {
+          ...state,
+          isLoading: false,
+          error: err.message || 'Failed to execute prompt'
         }
-
-        const data = await response.json();
-        return data.results;
-      };
-
-      // Execute all models in parallel (with staggered delays inside executeModel)
-      const resultsArray = await Promise.all(
-        allModels.map((modelId, index) => executeModel(modelId, index))
-      );
-
-      // Flatten results array
-      const allResults = resultsArray.flat();
-
-      // Update execution history (keep last 3 per prompt)
-      setExecutionHistory(prev => {
-        const promptHistory = prev[promptId] || [];
-        const updatedHistory = [...allResults, ...promptHistory].slice(0, 3);
-        return {
-          ...prev,
-          [promptId]: updatedHistory,
-        };
-      });
-
-      // Auto-expand the card to show results
-      setExpandedCards(prev => ({ ...prev, [promptId]: true }));
-    } catch (error) {
-      console.error('Error executing prompt:', error);
-    } finally {
-      setIsExecuting(prev => ({ ...prev, [promptId]: false }));
-      setCurrentExecutingModel(prev => ({ ...prev, [promptId]: '' }));
+      }));
     }
-  };
-
-  const getModelName = (modelId: string) => {
-    return AVAILABLE_MODELS.find(m => m.id === modelId)?.name || modelId;
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  };
-
-  const getExecutionCount = (promptId: string) => {
-    return executionHistory[promptId]?.length || 0;
-  };
-
-  const getLastExecutionTime = (promptId: string) => {
-    const history = executionHistory[promptId];
-    if (!history || history.length === 0) return null;
-    return formatTimestamp(history[0].createdAt);
-  };
-
-  const getPromptResults = (promptId: string) => {
-    return executionHistory[promptId] || [];
   };
 
   if (loading) {
@@ -461,81 +361,48 @@ export default function PromptsPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {prompts.map((prompt) => {
-            const isExpanded = expandedCards[prompt._id];
-            const results = getPromptResults(prompt._id);
-            const promptSelectedModels = selectedModels[prompt._id] || [];
-            const isPromptExecuting = isExecuting[prompt._id] || false;
+            const state = executionStates[prompt._id] || { comparisonModels: [], isLoading: false, results: null, error: '', isExpanded: false };
 
             return (
               <div
                 key={prompt._id}
-                className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
+                className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
               >
                 <div className="p-6">
+                  {/* Header */}
                   <div className="flex justify-between items-start mb-4">
-                    <h3
-                      className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
-                      onDoubleClick={() => openEditModal(prompt)}
-                      title="Double-click to edit"
-                    >
-                      {prompt.title}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditModal(prompt);
-                        }}
-                        className="text-gray-600 hover:text-gray-800 text-sm"
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(prompt._id);
-                        }}
-                        className="text-gray-600 hover:text-red-700 text-sm"
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-4">{prompt.title}</h3>
                   </div>
 
-                  <p
-                    className="text-sm text-gray-800 mb-4 line-clamp-3 cursor-pointer hover:text-indigo-600 transition-colors"
-                    onDoubleClick={() => openEditModal(prompt)}
-                    title="Double-click to edit"
-                  >
-                    {prompt.content}
-                  </p>
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-xs text-gray-600">{prompt.content.length}/512</p>
-                    <p className="text-xs text-gray-700">Write your prompt as if you were a customer searching for products</p>
-                  </div>
+                  {/* Content */}
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">{prompt.content}</p>
 
+                  {/* Character Counter */}
+                  <p className="text-xs text-gray-500 mb-4">{prompt.content.length}/512</p>
+
+                  {/* Model Comparison Section */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Compare with additional models:</p>
+                    <span className="block text-xs font-semibold text-gray-600 mb-2">
+                      Compare with additional models:
+                    </span>
                     <div className="flex flex-wrap gap-2">
-                      {AVAILABLE_MODELS.filter(m => m.id !== lastSelectedModel).map((model) => (
+                      {AVAILABLE_MODELS.map((model) => (
                         <div key={model.id} className="relative">
                           <input
                             type="checkbox"
-                            id={`compare-${prompt._id}-${model.id}`}
-                            checked={promptSelectedModels.includes(model.id)}
-                            onChange={() => toggleModelComparison(prompt._id, model.id)}
+                            id={`model-${prompt._id}-${model.id}`}
+                            checked={state.comparisonModels.includes(model.id)}
+                            onChange={() => toggleModel(prompt._id, model.id)}
                             className="sr-only"
                           />
                           <label
-                            htmlFor={`compare-${prompt._id}-${model.id}`}
-                            className={`inline-block px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all border-2 ${
-                              promptSelectedModels.includes(model.id)
+                            htmlFor={`model-${prompt._id}-${model.id}`}
+                            className={`inline-block px-3 py-1.5 text-xs font-medium rounded-full border-2 cursor-pointer transition-all ${
+                              state.comparisonModels.includes(model.id)
                                 ? 'bg-indigo-600 border-indigo-600 text-white'
-                                : 'bg-gray-50 border-gray-300 text-gray-700 hover:border-indigo-400'
+                                : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-indigo-400'
                             }`}
                           >
                             {model.name}
@@ -545,113 +412,99 @@ export default function PromptsPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleExecute(prompt._id)}
-                    disabled={isPromptExecuting}
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    {isPromptExecuting ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Executing using {getModelName(currentExecutingModel[prompt._id] || lastSelectedModel)}
+                  {/* Keyword Selection Section */}
+                  {keywords.length > 0 && (
+                    <div className="mb-4">
+                      <span className="block text-xs font-semibold text-gray-600 mb-2">
+                        Track keywords ({selectedKeywordIds.length}/{keywords.length}):
                       </span>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords.map((keyword) => (
+                          <div key={keyword._id} className="relative">
+                            <input
+                              type="checkbox"
+                              id={`keyword-${prompt._id}-${keyword._id}`}
+                              checked={selectedKeywordIds.includes(keyword._id)}
+                              onChange={() => toggleKeyword(keyword._id)}
+                              className="sr-only"
+                            />
+                            <label
+                              htmlFor={`keyword-${prompt._id}-${keyword._id}`}
+                              className={`inline-block px-3 py-1.5 text-xs font-medium rounded-full border-2 cursor-pointer transition-all ${
+                                selectedKeywordIds.includes(keyword._id)
+                                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-emerald-400'
+                              }`}
+                            >
+                              {keyword.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Execute Button */}
+                  <button
+                    onClick={() => handleExecute(prompt._id, prompt.title)}
+                    disabled={state.isLoading}
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg font-semibold text-sm hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {state.isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Executing...
+                      </>
                     ) : (
-                      <span>▶ Execute with {getModelName(lastSelectedModel)}</span>
+                      <>
+                        <span>▶</span>
+                        Execute with Gemini 2.0 Flash
+                      </>
                     )}
                   </button>
 
-                  {getExecutionCount(prompt._id) > 0 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1">
-                          {[...Array(Math.min(getExecutionCount(prompt._id), 3))].map((_, i) => (
-                            <div key={i} className="w-2 h-2 rounded-full bg-green-500"></div>
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-600">
-                          {getExecutionCount(prompt._id)} execution{getExecutionCount(prompt._id) > 1 ? 's' : ''} (last: {getLastExecutionTime(prompt._id)})
-                        </span>
-                      </div>
-                      {results.length > 0 && (
-                        <button
-                          onClick={() => toggleExpand(prompt._id)}
-                          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                        >
-                          {isExpanded ? 'Collapse ▲' : 'Expand ▼'}
-                        </button>
-                      )}
+                  {/* Error Message */}
+                  {state.error && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-600">{state.error}</p>
                     </div>
                   )}
+
+                  {/* Actions */}
+                  <div className="flex justify-between items-center pt-4 mt-4 border-t border-gray-200 gap-2">
+                    <button
+                      onClick={() => handleEditClick(prompt)}
+                      className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(prompt._id)}
+                      className="text-red-600 hover:text-red-700 text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
 
-                {isExpanded && results.length > 0 && (
-                  <div className="border-t-2 border-gray-200 bg-gray-50 p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-sm font-bold text-gray-900">Latest Results</h4>
-                      <button
-                        onClick={() => toggleExpand(prompt._id)}
-                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                      >
-                        Collapse ▲
+                {/* Results Section - Inline Expansion */}
+                {state.results && !state.isLoading && (
+                  <div className="border-t-2 border-gray-200">
+                    <div
+                      className="px-6 py-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => toggleExpand(prompt._id)}
+                    >
+                      <h4 className="text-sm font-semibold text-gray-900">
+                        Latest Results ({state.results.length})
+                      </h4>
+                      <button className="text-indigo-600 text-sm font-medium">
+                        {state.isExpanded ? 'Collapse ▲' : 'Expand ▼'}
                       </button>
                     </div>
 
-                    <div className="flex flex-col gap-4">
-                      {results.map((result, index) => (
-                        <div
-                          key={result._id}
-                          className={`bg-white rounded-lg p-4 border-l-4 ${
-                            index === 0 && promptSelectedModels.length > 0 ? 'border-orange-400' : 'border-indigo-600'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="font-bold text-gray-900 text-sm">
-                              {index === 0 && promptSelectedModels.length > 0 ? '🎯 ' : '⚖️ '}
-                              {getModelName(result.model)}
-                              {index === 0 && promptSelectedModels.length > 0 ? ' (Primary)' : ' (Comparison)'}
-                            </span>
-                            <span className="text-xs text-gray-500">{formatTimestamp(result.createdAt)}</span>
-                          </div>
-                          <p className="text-gray-700 text-sm leading-relaxed mb-2">{result.response}</p>
-                          <div className="mt-2 pt-2 border-t border-gray-100">
-                            {result.productsMentioned.length > 0 ? (
-                              <>
-                                <p className="text-xs font-semibold text-gray-700 mb-1.5">
-                                  Products Mentioned: {result.productsMentioned.length}
-                                </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {result.productsMentioned.map((product, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="bg-indigo-50 px-2 py-1 rounded text-xs font-medium text-indigo-600 border border-gray-200"
-                                    >
-                                      {product.productName}
-                                    </span>
-                                  ))}
-                                </div>
-                              </>
-                            ) : (
-                              <p className="text-xs text-gray-500 italic">No products mentioned</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {results.length > 1 && (
-                      <div className="mt-4 pt-4 border-t border-gray-300">
-                        <p className="text-xs text-gray-600 font-medium mb-3">Previous Executions</p>
-                        <div className="flex flex-col gap-2">
-                          {results.slice(1).map((result, index) => (
-                            <div key={result._id} className="bg-gray-100 p-3 rounded-lg text-xs">
-                              <div className="flex justify-between items-center mb-1">
-                                <span className="font-semibold text-gray-800">{getModelName(result.model)}</span>
-                                <span className="text-gray-500">{formatTimestamp(result.createdAt)}</span>
-                              </div>
-                              <p className="text-gray-600 line-clamp-2">{result.response}</p>
-                            </div>
-                          ))}
-                        </div>
+                    {state.isExpanded && (
+                      <div className="px-6 py-4 border-t border-gray-200">
+                        <ResultsMatrixView results={state.results} keywords={keywords} />
                       </div>
                     )}
                   </div>
@@ -662,34 +515,13 @@ export default function PromptsPage() {
         </div>
       )}
 
-      {editingPrompt && (
-        <PromptEditModal
-          key={editingPrompt._id}
-          prompt={editingPrompt}
-          isOpen={!!editingPrompt}
-          onClose={closeEditModal}
-          onSave={handleSaveEdit}
-        />
-      )}
-
-      {deletingPrompt && (
-        <PromptDeleteConfirmModal
-          prompt={deletingPrompt}
-          isOpen={!!deletingPrompt}
-          onClose={closeDeleteModal}
-          onConfirm={confirmDelete}
-        />
-      )}
-
-      {showQuickTest && (
-        <QuickTestModal
-          isOpen={showQuickTest}
-          onClose={() => setShowQuickTest(false)}
-          onExecute={handleQuickTestExecute}
-          onSaveAsPrompt={handleSaveAsPrompt}
-          lastSelectedModel={lastSelectedModel}
-        />
-      )}
+      {/* Edit Prompt Modal */}
+      <EditPromptModal
+        isOpen={isEditModalOpen}
+        prompt={promptToEdit}
+        onClose={handleCloseEditModal}
+        onUpdate={handlePromptUpdated}
+      />
     </div>
   );
 }

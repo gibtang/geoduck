@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import User from '@/models/User';
 
 export async function GET(request: NextRequest) {
@@ -25,13 +25,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const products = await Product.find({ user: user._id }).sort({ createdAt: -1 });
+    const keywords = await Keyword.find({ user: user._id }).sort({ createdAt: -1 });
 
-    return NextResponse.json(products);
+    return NextResponse.json(keywords);
   } catch (error: any) {
-    console.error('Error fetching products:', error);
+    console.error('Error fetching keywords:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch products' },
+      { error: 'Failed to fetch keywords' },
       { status: 500 }
     );
   }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const { name, description } = data;
+    const { name } = data;
 
     if (!name) {
       return NextResponse.json(
@@ -69,17 +69,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const product = await Product.create({
+    const keyword = await Keyword.create({
       name,
-      description: description || '',
       user: user._id,
     });
 
-    return NextResponse.json(product, { status: 201 });
+    return NextResponse.json(keyword, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    console.error('Error creating keyword:', error);
     return NextResponse.json(
-      { error: 'Failed to create product' },
+      { error: 'Failed to create keyword' },
       { status: 500 }
     );
   }

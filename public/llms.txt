@@ -1,0 +1,86 @@
+# Available AI Models
+
+Compare insights from multiple AI models side-by-side. Geoduck supports the latest cutting-edge language models from leading AI companies.
+
+## Available Models
+
+### OpenAI Models
+- **GPT-5.2** - OpenAI's latest frontier-grade model with adaptive reasoning
+- **GPT-5.1** - Advanced model with strong general-purpose reasoning
+- **GPT-4o** - Multimodal model supporting both text and image inputs
+- **GPT-4o Mini** - Fast, cost-effective small model
+- **GPT-4 Turbo** - Optimized for speed and efficiency
+
+### Google Gemini Models
+- **Gemini 3 Pro** - Google's flagship model for advanced reasoning and multimodal tasks
+- **Gemini 2.5 Flash** - State-of-the-art workhorse model with thinking capabilities
+- **Gemini 2.5 Flash Lite** - Ultra-low latency for real-time applications
+- **Gemini Pro** - High-precision multimodal reasoning model
+
+### Anthropic Claude Models
+- **Claude Opus 4.5** - Anthropic's most powerful model for complex software engineering
+- **Claude Sonnet 4.5** - Optimized for real-world agents and coding workflows
+- **Claude Haiku 4.5** - Fastest and most efficient model with near-frontier intelligence
+- **Claude Sonnet 4** - Enhanced capabilities with improved precision
+
+### xAI Grok Models
+- **Grok 4** - xAI's flagship model excelling at data extraction and text summarization
+- **Grok 4 Fast** - Best agentic tool calling model for customer support and research
+- **Grok 3** - Latest model with enterprise use cases and deep domain knowledge
+- **Grok 3 Mini** - Lightweight thinking model for math and quantitative tasks
+
+## Why Compare Multiple Models?
+
+Each AI model has unique strengths:
+- **Different reasoning approaches** - See how various models approach the same problem
+- **Specialized capabilities** - Some excel at coding, others at writing or analysis
+- **Cost vs performance** - Balance speed, accuracy, and cost for your needs
+- **Diverse perspectives** - Get multiple viewpoints on complex questions
+
+Compare models to:
+- **Validate insights** - Cross-reference important information
+- **Optimize costs** - Use faster models for simple tasks, advanced for complex
+- **Improve accuracy** - Leverage each model's specialized strengths
+- **Enhance understanding** - Gain comprehensive perspectives on your data
+
+## Use Cases
+
+### Software Development
+- **GPT-5.2 & Claude Opus 4.5** - Complex architecture and refactoring
+- **Grok 4 Fast** - Multi-step debugging and technical documentation
+- **Gemini 2.5 Flash** - Fast code generation and completion
+
+### Data Analysis & Research
+- **Claude Sonnet 4.5** - Multi-file codebase exploration and analysis
+- **GPT-5.1** - Long-context processing and document synthesis
+- **Grok 4** - Enterprise data extraction and summarization
+
+### Content Creation
+- **Claude Haiku 4.5** - Rapid content generation at scale
+- **GPT-4o** - Multimodal content with images and video
+- **Gemini 3 Pro** - Research-backed content with citations
+
+### Customer Support
+- **Grok 3 Mini** - Quick calculations and quantitative queries
+- **Claude Sonnet 4** - Nuanced customer interactions
+- **GPT-4o Mini** - High-volume simple inquiries
+
+## Model Selection Guide
+
+Choose models based on your priorities:
+
+**For maximum accuracy** → GPT-5.2, Claude Opus 4.5, or Gemini 3 Pro
+
+**For speed** → Gemini 2.5 Flash Lite, Claude Haiku 4.5, or GPT-4o Mini
+
+**For coding** → GPT-5.1 Codex, Claude Sonnet 4.5, or Grok 4 Fast
+
+**For cost efficiency** → Gemini 2.5 Flash Lite, GPT-4o Mini, or Claude Haiku 4.5
+
+**For research** → Grok 4, GPT-5.1, or Claude Sonnet 4.5
+
+**For multimodal**** → GPT-4o, Gemini 3 Pro, or Claude Sonnet 4.5
+
+Start with **Gemini 2.5 Flash** as your default - it offers an excellent balance of speed, cost, and intelligence.
+
+Visit Geoduck to compare models and discover the best AI for your specific needs.

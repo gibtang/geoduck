@@ -8,7 +8,7 @@ export const mockUser = {
   save: jest.fn().mockResolvedValue(this),
 };
 
-export const mockProduct = {
+export const mockKeyword = {
   _id: '507f1f77bcf86cd799439012',
   name: 'Wireless Headphones',
   description: 'High-quality wireless headphones',
@@ -24,8 +24,8 @@ export const mockProduct = {
 export const mockPrompt = {
   _id: '507f1f77bcf86cd799439013',
   title: 'Test Prompt',
-  content: 'What are the best products?',
-  category: 'Product Discovery',
+  content: 'What are the best keywords?',
+  category: 'Keyword Discovery',
   user: mockUser._id,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -37,14 +37,14 @@ export const mockResult = {
   prompt: mockPrompt._id,
   llmModel: 'gemini-2.0-flash',
   response: 'Test response',
-  productsMentioned: [],
+  keywordsMentioned: [],
   user: mockUser._id,
   createdAt: new Date(),
   save: jest.fn().mockResolvedValue(this),
 };
 
-// Mock Product.find
-export const mockProductFind = {
+// Mock Keyword.find
+export const mockKeywordFind = {
   exec: jest.fn(),
   lean: jest.fn().mockReturnThis(),
   sort: jest.fn().mockReturnThis(),
@@ -64,8 +64,8 @@ export const mockUserFindOne = {
   lean: jest.fn().mockReturnThis(),
 };
 
-// Mock Product create/update/delete
-export const mockProductOperations = {
+// Mock Keyword create/update/delete
+export const mockKeywordOperations = {
   create: jest.fn(),
   findById: jest.fn(),
   findByIdAndUpdate: jest.fn(),
@@ -73,7 +73,7 @@ export const mockProductOperations = {
   findOne: jest.fn(),
   findOneAndUpdate: jest.fn(),
   findOneAndDelete: jest.fn(),
-  find: jest.fn().mockReturnValue(mockProductFind),
+  find: jest.fn().mockReturnValue(mockKeywordFind),
 };
 
 // Mock Prompt operations
@@ -109,13 +109,13 @@ export function setupMocks() {
   jest.clearAllMocks();
 
   // Reset all mock return values
-  mockProductFind.exec.mockResolvedValue([]);
+  mockKeywordFind.exec.mockResolvedValue([]);
   mockPromptFind.exec.mockResolvedValue([]);
   mockUserFindOne.exec.mockResolvedValue(mockUser);
 
-  mockProductOperations.create.mockResolvedValue(mockProduct);
-  mockProductOperations.findById.mockResolvedValue(mockProduct);
-  mockProductOperations.findOne.mockResolvedValue(mockProduct);
+  mockKeywordOperations.create.mockResolvedValue(mockKeyword);
+  mockKeywordOperations.findById.mockResolvedValue(mockKeyword);
+  mockKeywordOperations.findOne.mockResolvedValue(mockKeyword);
 
   mockPromptOperations.create.mockResolvedValue(mockPrompt);
   mockPromptOperations.findById.mockResolvedValue(mockPrompt);

@@ -213,7 +213,7 @@ export default function ResultsPage() {
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <p className="text-sm text-yellow-800">
-                        No products were mentioned in this response.
+                        No keywords were mentioned in this response.
                       </p>
                     </div>
                   )}

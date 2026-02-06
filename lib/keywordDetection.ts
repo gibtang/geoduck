@@ -1,23 +1,23 @@
-import Product from '../models/Product';
+import Keyword from '../models/Keyword';
 
-interface ProductMentionDetection {
-  product: any;
+interface KeywordMentionDetection {
+  keyword: any;
   position: number;
   sentiment: 'positive' | 'neutral' | 'negative';
   context: string;
 }
 
-export function detectProductMentions(
+export function detectKeywordMentions(
   response: string,
-  products: any[]
-): ProductMentionDetection[] {
-  const mentions: ProductMentionDetection[] = [];
+  keywords: any[]
+): KeywordMentionDetection[] {
+  const mentions: KeywordMentionDetection[] = [];
   const responseLower = response.toLowerCase();
 
-  products.forEach((product) => {
-    const productName = product.name.toLowerCase();
-    const keywords = product.keywords.map((k: string) => k.toLowerCase());
-    const allSearchTerms = [productName, ...keywords];
+  keywords.forEach((keyword) => {
+    const keywordName = keyword.name.toLowerCase();
+    // Search only by keyword name (keywords field was removed in refactor)
+    const allSearchTerms = [keywordName];
 
     for (const term of allSearchTerms) {
       const index = responseLower.indexOf(term);
@@ -30,7 +30,7 @@ export function detectProductMentions(
         const sentiment = analyzeSentiment(context, response);
 
         mentions.push({
-          product,
+          keyword,
           position: index,
           sentiment,
           context: context.trim(),
@@ -92,17 +92,16 @@ function analyzeSentiment(context: string, fullResponse: string): 'positive' | '
   return 'neutral';
 }
 
-export function highlightProductMentions(
+export function highlightKeywordMentions(
   response: string,
-  mentions: ProductMentionDetection[]
+  mentions: KeywordMentionDetection[]
 ): string {
   let highlightedResponse = response;
 
   mentions.forEach((mention) => {
-    const productName = mention.product.name;
-    const keywords = mention.product.keywords;
-
-    const regex = new RegExp(`(${productName}|${keywords.join('|')})`, 'gi');
+    const keywordName = mention.keyword.name;
+    // Highlight keyword name only (keywords field was removed in refactor)
+    const regex = new RegExp(`(${keywordName})`, 'gi');
 
     highlightedResponse = highlightedResponse.replace(regex, '**$1**');
   });

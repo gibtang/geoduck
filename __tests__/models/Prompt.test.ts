@@ -27,7 +27,7 @@ describe('Prompt Model', () => {
   it('should create a prompt with valid data', async () => {
     const promptData = {
       title: 'Test Prompt',
-      content: 'What are the best products?',
+      content: 'What are the best keywords?',
       user: userId,
     };
 

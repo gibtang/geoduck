@@ -16,13 +16,20 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Protect all other API routes
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  if (!token && pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/signin', request.url));
+  }
+
+  if (!token && pathname.startsWith('/keywords')) {
+    return NextResponse.redirect(new URL('/signin', request.url));
+  }
+
+  if (!token && pathname.startsWith('/prompts')) {
+    return NextResponse.redirect(new URL('/signin', request.url));
+  }
+
+  if (!token && pathname.startsWith('/results')) {
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
 
   return NextResponse.next();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import User from '@/models/User';
 
 export async function GET(
@@ -30,23 +30,23 @@ export async function GET(
 
     const { id } = await params;
 
-    const product = await Product.findOne({
+    const keyword = await Keyword.findOne({
       _id: id,
       user: user._id,
     });
 
-    if (!product) {
+    if (!keyword) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Keyword not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(keyword);
   } catch (error: any) {
-    console.error('Error fetching product:', error);
+    console.error('Error fetching keyword:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch product' },
+      { error: 'Failed to fetch keyword' },
       { status: 500 }
     );
   }
@@ -78,33 +78,32 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const { name, description } = data;
+    const { name } = data;
     const { id } = await params;
 
-    const product = await Product.findOneAndUpdate(
+    const keyword = await Keyword.findOneAndUpdate(
       {
         _id: id,
         user: user._id,
       },
       {
         name,
-        description: description || '',
       },
       { new: true, runValidators: true }
     );
 
-    if (!product) {
+    if (!keyword) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Keyword not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(keyword);
   } catch (error: any) {
-    console.error('Error updating product:', error);
+    console.error('Error updating keyword:', error);
     return NextResponse.json(
-      { error: 'Failed to update product' },
+      { error: 'Failed to update keyword' },
       { status: 500 }
     );
   }
@@ -137,23 +136,23 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const product = await Product.findOneAndDelete({
+    const keyword = await Keyword.findOneAndDelete({
       _id: id,
       user: user._id,
     });
 
-    if (!product) {
+    if (!keyword) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Keyword not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ message: 'Product deleted successfully' });
+    return NextResponse.json({ message: 'Keyword deleted successfully' });
   } catch (error: any) {
-    console.error('Error deleting product:', error);
+    console.error('Error deleting keyword:', error);
     return NextResponse.json(
-      { error: 'Failed to delete product' },
+      { error: 'Failed to delete keyword' },
       { status: 500 }
     );
   }

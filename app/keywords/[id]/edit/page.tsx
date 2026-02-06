@@ -4,19 +4,17 @@ import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter, useParams } from 'next/navigation';
-import { trackUpdatePrompt } from '@/lib/ganalytics';
+import { trackUpdateKeyword } from '@/lib/ganalytics';
 
-interface Prompt {
+interface Keyword {
   _id: string;
-  title: string;
-  content: string;
+  name: string;
 }
 
-export default function EditPromptPage() {
+export default function EditKeywordPage() {
   const params = useParams();
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
+    name: '',
   });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -30,17 +28,17 @@ export default function EditPromptPage() {
         router.push('/signin');
       } else {
         setUser(user);
-        fetchPrompt(user, params.id as string);
+        fetchKeyword(user, params.id as string);
       }
     });
 
     return () => unsubscribe();
   }, [router, params.id]);
 
-  const fetchPrompt = async (currentUser: any, id: string) => {
+  const fetchKeyword = async (currentUser: any, id: string) => {
     try {
       const token = await currentUser.getIdToken();
-      const response = await fetch(`/api/prompts/${id}`, {
+      const response = await fetch(`/api/keywords/${id}`, {
         headers: {
           'x-firebase-uid': currentUser.uid,
           Authorization: `Bearer ${token}`,
@@ -48,18 +46,17 @@ export default function EditPromptPage() {
       });
 
       if (response.ok) {
-        const data: Prompt = await response.json();
+        const data: Keyword = await response.json();
         setFormData({
-          title: data.title,
-          content: data.content,
+          name: data.name,
         });
         setError('');
       } else {
-        setError('Failed to load prompt');
+        setError('Failed to load keyword');
       }
     } catch (error) {
-      console.error('Error fetching prompt:', error);
-      setError('Failed to load prompt');
+      console.error('Error fetching keyword:', error);
+      setError('Failed to load keyword');
     } finally {
       setFetching(false);
     }
@@ -74,25 +71,27 @@ export default function EditPromptPage() {
     try {
       const token = await user.getIdToken();
 
-      const response = await fetch(`/api/prompts/${params.id}`, {
+      const response = await fetch(`/api/keywords/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+        }),
       });
 
       if (response.ok) {
-        trackUpdatePrompt(formData.title);
-        router.push('/prompts');
+        trackUpdateKeyword(formData.name);
+        router.push('/keywords');
       } else {
-        alert('Failed to update prompt');
+        alert('Failed to update keyword');
       }
     } catch (error) {
-      console.error('Error updating prompt:', error);
-      alert('Failed to update prompt');
+      console.error('Error updating keyword:', error);
+      alert('Failed to update keyword');
     } finally {
       setLoading(false);
     }
@@ -116,8 +115,8 @@ export default function EditPromptPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Edit Prompt</h1>
-        <p className="mt-2 text-gray-600">Update prompt information</p>
+        <h1 className="text-3xl font-bold text-gray-900">Edit Keyword</h1>
+        <p className="mt-2 text-gray-600">Update keyword information</p>
       </div>
 
       {error && (
@@ -128,44 +127,25 @@ export default function EditPromptPage() {
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-            Prompt Title *
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            Keyword Name *
           </label>
           <input
             type="text"
-            id="title"
-            name="title"
+            id="name"
+            name="name"
             required
-            value={formData.title}
+            value={formData.name}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-            placeholder="e.g., Top Toys for Christmas"
+            placeholder="e.g., Wireless Bluetooth Headphones"
           />
-        </div>
-
-        <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-            Prompt Content *
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            required
-            value={formData.content}
-            onChange={handleChange}
-            rows={8}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
-            placeholder="What are the top toys to buy this holiday season? Include specific brands and features."
-          />
-          <p className="mt-1 text-sm text-gray-500">
-            Write your prompt as if you were a customer searching for products
-          </p>
         </div>
 
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
-            onClick={() => router.push('/prompts')}
+            onClick={() => router.push('/keywords')}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Cancel
@@ -175,7 +155,7 @@ export default function EditPromptPage() {
             disabled={loading}
             className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Updating...' : 'Update Prompt'}
+            {loading ? 'Updating...' : 'Update Keyword'}
           </button>
         </div>
       </form>

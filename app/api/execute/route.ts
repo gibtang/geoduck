@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import Product from '@/models/Product';
+import Keyword from '@/models/Keyword';
 import Prompt from '@/models/Prompt';
 import Result from '@/models/Result';
 import { executePromptNonStreaming, AVAILABLE_MODELS } from '@/lib/openrouter';
-import { detectProductMentions } from '@/lib/productDetection';
+import { detectKeywordMentions } from '@/lib/keywordDetection';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { promptId, model, promptContent, compareModels } = await request.json();
+    const { promptId, llmModel, promptContent, comparisonModels, selectedKeywordIds } = await request.json();
 
-    if (!model) {
+    if (!llmModel) {
       return NextResponse.json(
         { error: 'Model is required' },
         { status: 400 }
@@ -64,23 +64,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const products = await Product.find({ user: user._id });
+    let keywords = await Keyword.find({ user: user._id });
+
+    // Filter to only selected keywords if provided
+    if (selectedKeywordIds && selectedKeywordIds.length > 0) {
+      keywords = keywords.filter(k => selectedKeywordIds.includes(k._id.toString()));
+    }
+
+    // === DEBUG LOGGING ===
+    console.log('\n=== LLM EXECUTION DEBUG ===');
+    console.log('Primary model:', llmModel);
+    console.log('Comparison models:', comparisonModels);
+    console.log('Comparison models count:', comparisonModels ? comparisonModels.length : 0);
+    console.log('Keywords to detect:', keywords.length);
+    console.log('Expected total results:', comparisonModels ? comparisonModels.length + 1 : 1);
+    console.log('=========================\n');
+    // === END DEBUG LOGGING ===
 
     const results = [];
 
-    if (compareModels && compareModels.length > 0) {
-      for (const modelName of compareModels) {
-        const response = await executePromptNonStreaming(modelName, prompt);
-        const fullResponse = await response.text;
+    // ALWAYS execute primary model first
+    console.log(`  → Executing primary model: ${llmModel}`);
+    const response = await executePromptNonStreaming(llmModel, prompt);
+    const fullResponse = await response.text;
 
-        const productMentions = detectProductMentions(fullResponse, products);
+    const keywordMentions = detectKeywordMentions(fullResponse, keywords);
 
-        const result = await Result.create({
+    const result = await Result.create({
+      prompt: promptDoc?._id || null,
+      llmModel: llmModel,
+      response: fullResponse,
+      keywordsMentioned: keywordMentions.map((mention) => ({
+        keyword: mention.keyword._id,
+        position: mention.position,
+        sentiment: mention.sentiment,
+        context: mention.context,
+      })),
+      user: user._id,
+    });
+
+    results.push({
+      _id: result._id,
+      llmModel,
+      response: fullResponse,
+      keywordsMentioned: keywordMentions.map((km) => ({
+        ...km,
+        keywordId: km.keyword._id,
+        keywordName: km.keyword.name,
+      })),
+      createdAt: result.createdAt,
+    });
+
+    // THEN execute comparison models if provided
+    if (comparisonModels && comparisonModels.length > 0) {
+      console.log('  → Executing comparison models:', comparisonModels);
+      for (const modelName of comparisonModels) {
+        console.log(`    → Executing: ${modelName}`);
+        const compResponse = await executePromptNonStreaming(modelName, prompt);
+        const compFullResponse = await compResponse.text;
+
+        const compKeywordMentions = detectKeywordMentions(compFullResponse, keywords);
+
+        const compResult = await Result.create({
           prompt: promptDoc?._id || null,
           llmModel: modelName,
-          response: fullResponse,
-          productsMentioned: productMentions.map((mention) => ({
-            product: mention.product._id,
+          response: compFullResponse,
+          keywordsMentioned: compKeywordMentions.map((mention) => ({
+            keyword: mention.keyword._id,
             position: mention.position,
             sentiment: mention.sentiment,
             context: mention.context,
@@ -89,48 +139,29 @@ export async function POST(request: NextRequest) {
         });
 
         results.push({
-          _id: result._id,
-          model: modelName,
-          response: fullResponse,
-          productsMentioned: productMentions.map((pm) => ({
-            ...pm,
-            productId: pm.product._id,
-            productName: pm.product.name,
+          _id: compResult._id,
+          llmModel: modelName,
+          response: compFullResponse,
+          keywordsMentioned: compKeywordMentions.map((km) => ({
+            ...km,
+            keywordId: km.keyword._id,
+            keywordName: km.keyword.name,
           })),
-          createdAt: result.createdAt,
+          createdAt: compResult.createdAt,
         });
       }
-    } else {
-      const response = await executePromptNonStreaming(model, prompt);
-      const fullResponse = await response.text;
-
-      const productMentions = detectProductMentions(fullResponse, products);
-
-      const result = await Result.create({
-        prompt: promptDoc?._id || null,
-        llmModel: model,
-        response: fullResponse,
-        productsMentioned: productMentions.map((mention) => ({
-          product: mention.product._id,
-          position: mention.position,
-          sentiment: mention.sentiment,
-          context: mention.context,
-        })),
-        user: user._id,
-      });
-
-      results.push({
-        _id: result._id,
-        model,
-        response: fullResponse,
-        productsMentioned: productMentions.map((pm) => ({
-          ...pm,
-          productId: pm.product._id,
-          productName: pm.product.name,
-        })),
-        createdAt: result.createdAt,
-      });
     }
+
+    // === DEBUG RESULTS ===
+    console.log('\n=== EXECUTION RESULTS ===');
+    console.log('Actual results created:', results.length);
+    console.log('Models executed:', results.map(r => r.llmModel));
+    console.log('Expected vs Actual:', comparisonModels ? comparisonModels.length + 1 : 1, 'vs', results.length);
+    if (results.length !== (comparisonModels ? comparisonModels.length + 1 : 1)) {
+      console.log('❌ BUG CONFIRMED: Result count mismatch!');
+    }
+    console.log('========================\n');
+    // === END DEBUG RESULTS ===
 
     return NextResponse.json({ results }, { status: 201 });
   } catch (error: any) {
