@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Product name is required' },
         { status: 400 }
       );
     }

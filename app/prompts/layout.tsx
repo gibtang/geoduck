@@ -1,4 +1,7 @@
 import Header from '@/components/Header';
+import { getPromptsMetadata } from '@/lib/metadata';
+
+export const metadata = getPromptsMetadata();
 
 export default function PromptsLayout({
   children,

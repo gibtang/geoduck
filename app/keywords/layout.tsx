@@ -1,4 +1,7 @@
 import Header from '@/components/Header';
+import { getProductsMetadata } from '@/lib/metadata';
+
+export const metadata = getProductsMetadata();
 
 export default function ProductsLayout({
   children,

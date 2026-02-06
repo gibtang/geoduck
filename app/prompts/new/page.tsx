@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { trackCreatePrompt } from '@/lib/ganalytics';
+import { useAuth } from '@/components/AuthContext';
 
 export default function NewPromptPage() {
   const [formData, setFormData] = useState({
@@ -12,20 +11,15 @@ export default function NewPromptPage() {
     content: '',
   });
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
+  // Redirect to signin if not authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push('/signin');
-      } else {
-        setUser(user);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
+    if (!authLoading && !user) {
+      router.push('/signin');
+    }
+  }, [authLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,11 +57,20 @@ export default function NewPromptPage() {
     });
   };
 
+  // Show loading spinner while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Create New Prompt</h1>
-        <p className="mt-2 text-gray-600">Create a test prompt for GEO analysis</p>
+        <p className="mt-2 text-gray-800">Create a test prompt for GEO analysis</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6 space-y-6 border border-gray-200">
@@ -95,15 +98,21 @@ export default function NewPromptPage() {
             id="content"
             name="content"
             required
+            maxLength={512}
             value={formData.content}
             onChange={handleChange}
             rows={8}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
             placeholder="What are the top toys to buy this holiday season? Include specific brands and features."
           />
-          <p className="mt-1 text-sm text-gray-500">
-            Write your prompt as if you were a customer searching for products
-          </p>
+          <div className="mt-1 flex justify-between items-center">
+            <p className="text-sm text-gray-700">
+              Write your prompt as if you were a customer searching for products
+            </p>
+            <p className="text-sm text-gray-600">
+              {formData.content.length}/512
+            </p>
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 pt-4">

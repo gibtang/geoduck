@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 import { trackDeletePrompt } from '@/lib/ganalytics';
 import EditPromptModal from '@/components/EditPromptModal';
@@ -48,6 +46,22 @@ export default function PromptsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [promptToEdit, setPromptToEdit] = useState<Prompt | null>(null);
 
+  // Inline expansion state
+  const [selectedModels, setSelectedModels] = useState<{ [promptId: string]: string[] }>({});
+  const [isExecuting, setIsExecuting] = useState<{ [promptId: string]: boolean }>({});
+  const [currentExecutingModel, setCurrentExecutingModel] = useState<{ [promptId: string]: string }>({});
+  const [executionHistory, setExecutionHistory] = useState<ExecutionHistory>({});
+  const [lastSelectedModel, setLastSelectedModel] = useState<string>(AVAILABLE_MODELS[0].id);
+  const [expandedCards, setExpandedCards] = useState<ExpandedCards>({});
+
+  // Inline editing state
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+  const [deletingPrompt, setDeletingPrompt] = useState<Prompt | null>(null);
+
+  // Quick Test modal state
+  const [showQuickTest, setShowQuickTest] = useState(false);
+
+  // Load last selected model and execution history from localStorage
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -59,15 +73,52 @@ export default function PromptsPage() {
       }
     });
 
-    return () => unsubscribe();
+    const savedHistory = localStorage.getItem('executionHistory');
+    if (savedHistory) {
+      try {
+        setExecutionHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error('Error parsing execution history:', e);
+      }
+    }
+
+    const savedExpanded = localStorage.getItem('expandedCards');
+    if (savedExpanded) {
+      try {
+        setExpandedCards(JSON.parse(savedExpanded));
+      } catch (e) {
+        console.error('Error parsing expanded cards:', e);
+      }
+    }
   }, []);
 
-  const fetchPrompts = async (currentUser: any) => {
+  // Save to localStorage
+  useEffect(() => {
+    if (Object.keys(executionHistory).length > 0) {
+      localStorage.setItem('executionHistory', JSON.stringify(executionHistory));
+    }
+  }, [executionHistory]);
+
+  useEffect(() => {
+    localStorage.setItem('expandedCards', JSON.stringify(expandedCards));
+  }, [expandedCards]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPrompts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchPrompts = async () => {
+    if (!user) return;
+
     try {
-      const token = await currentUser.getIdToken();
+      const token = await user.getIdToken();
       const response = await fetch('/api/prompts', {
         headers: {
-          'x-firebase-uid': currentUser.uid,
+          'x-firebase-uid': user.uid,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -122,14 +173,20 @@ export default function PromptsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
+
     const promptToDelete = prompts.find(p => p._id === id);
-    if (!confirm('Are you sure you want to delete this prompt?')) {
-      return;
+    if (promptToDelete) {
+      setDeletingPrompt(promptToDelete);
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!user || !deletingPrompt) return;
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/prompts/${id}`, {
+      const response = await fetch(`/api/prompts/${deletingPrompt._id}`, {
         method: 'DELETE',
         headers: {
           'x-firebase-uid': user.uid,
@@ -145,6 +202,7 @@ export default function PromptsPage() {
       }
     } catch (error) {
       console.error('Error deleting prompt:', error);
+      throw error;
     }
   };
 
@@ -256,20 +314,28 @@ export default function PromptsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Prompts</h1>
-          <p className="mt-2 text-gray-600">Create and manage test prompts</p>
+          <p className="mt-2 text-gray-800">Create and manage test prompts</p>
         </div>
-        <Link
-          href="/prompts/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Create Prompt
-        </Link>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowQuickTest(true)}
+            className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+          >
+            Quick Test
+          </button>
+          <Link
+            href="/prompts/new"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Create Prompt
+          </Link>
+        </div>
       </div>
 
       {prompts.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -282,7 +348,7 @@ export default function PromptsPage() {
             />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900">No prompts</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-700">
             Get started by creating your first test prompt.
           </p>
           <div className="mt-6">

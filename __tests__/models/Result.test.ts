@@ -40,7 +40,6 @@ describe('Result Model', () => {
     const prompt = await Prompt.create({
       title: 'Test Prompt',
       content: 'Test prompt content',
-      category: 'Test',
       user: userId,
     });
     promptId = prompt._id;

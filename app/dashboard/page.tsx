@@ -1,11 +1,14 @@
 import Link from 'next/link';
+import { getDashboardMetadata } from '@/lib/metadata';
+
+export const metadata = getDashboardMetadata();
 
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Welcome to GEO Platform</h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-gray-800">
           Optimize your products for AI-powered search engines
         </p>
       </div>

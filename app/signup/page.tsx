@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { trackSignUp } from '@/lib/ganalytics';
 import GoogleSignIn from '@/components/GoogleSignIn';
+import { useAuth } from '@/components/AuthContext';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,23 @@ export default function SignUpPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
+  // Auto-redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   /**
    * Handles email/password form submission
@@ -51,12 +69,8 @@ export default function SignUpPage() {
         throw new Error(errorData.message || 'Failed to create user in database');
       }
 
-      // Get Firebase ID token and set it as a cookie for middleware authentication
-      const idToken = await userCredential.user.getIdToken();
-      document.cookie = `firebase-auth-token=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-
+      // Note: Cookie is set by AuthContext, navigation is handled by useEffect above
       trackSignUp('email');
-      router.push('/dashboard');
     } catch (err: unknown) {
       // Type-safe error handling
       const error = err as { code?: string; message?: string };
@@ -90,7 +104,7 @@ export default function SignUpPage() {
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
@@ -123,7 +137,7 @@ export default function SignUpPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-500"
                 placeholder="••••••••"
               />
-              <p className="mt-1 text-sm text-gray-500">Password must be at least 6 characters</p>
+              <p className="mt-1 text-sm text-gray-700">Password must be at least 6 characters</p>
             </div>
 
             <button
@@ -140,7 +154,7 @@ export default function SignUpPage() {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+              <span className="px-4 bg-white text-gray-700">Or continue with</span>
             </div>
           </div>
 
@@ -150,7 +164,7 @@ export default function SignUpPage() {
             onError={setError}
           />
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-gray-800">
             Already have an account?{' '}
             <Link href="/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
               Sign In

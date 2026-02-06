@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     console.log('=========================\n');
     // === END DEBUG LOGGING ===
 
-    let results = [];
+    const results = [];
 
     // ALWAYS execute primary model first
     console.log(`  → Executing primary model: ${llmModel}`);
@@ -173,6 +173,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({ models: AVAILABLE_MODELS });
 }
