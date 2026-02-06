@@ -83,75 +83,110 @@ export async function POST(request: NextRequest) {
 
     let results = [];
 
-    // ALWAYS execute primary model first
+    // Execute primary model with error handling
     console.log(`  → Executing primary model: ${llmModel}`);
-    const response = await executePromptNonStreaming(llmModel, prompt);
-    const fullResponse = await response.text;
+    try {
+      const response = await executePromptNonStreaming(llmModel, prompt);
+      const fullResponse = await response.text;
 
-    const keywordMentions = detectKeywordMentions(fullResponse, keywords);
+      const keywordMentions = detectKeywordMentions(fullResponse, keywords);
 
-    const result = await Result.create({
-      prompt: promptDoc?._id || null,
-      llmModel: llmModel,
-      response: fullResponse,
-      keywordsMentioned: keywordMentions.map((mention) => ({
-        keyword: mention.keyword._id,
-        position: mention.position,
-        sentiment: mention.sentiment,
-        context: mention.context,
-      })),
-      user: user._id,
-    });
+      const result = await Result.create({
+        prompt: promptDoc?._id || null,
+        llmModel: llmModel,
+        response: fullResponse,
+        keywordsMentioned: keywordMentions.map((mention) => ({
+          keyword: mention.keyword._id,
+          position: mention.position,
+          sentiment: mention.sentiment,
+          context: mention.context,
+        })),
+        user: user._id,
+      });
 
-    results.push({
-      _id: result._id,
-      llmModel,
-      response: fullResponse,
-      keywordsMentioned: keywordMentions.map((km) => ({
-        ...km,
-        keywordId: km.keyword._id,
-        keywordName: km.keyword.name,
-      })),
-      createdAt: result.createdAt,
-    });
+      results.push({
+        _id: result._id,
+        llmModel,
+        response: fullResponse,
+        keywordsMentioned: keywordMentions.map((km) => ({
+          ...km,
+          keywordId: km.keyword._id,
+          keywordName: km.keyword.name,
+        })),
+        createdAt: result.createdAt,
+        status: 'success',
+        error: null,
+      });
+    } catch (error: any) {
+      console.error(`    ✗ Primary model failed: ${llmModel}`, error.message);
+      results.push({
+        _id: null,
+        llmModel,
+        response: null,
+        keywordsMentioned: [],
+        createdAt: null,
+        status: 'error',
+        error: error.message || 'Failed to execute model',
+      });
+    }
 
-    // THEN execute comparison models in parallel if provided
+    // Execute comparison models in parallel with individual error handling
     if (comparisonModels && comparisonModels.length > 0) {
       console.log('  → Executing comparison models in parallel:', comparisonModels);
 
-      const comparisonResults = await Promise.all(
+      const comparisonSettledResults = await Promise.allSettled(
         comparisonModels.map(async (modelName) => {
           console.log(`    → Executing: ${modelName}`);
-          const compResponse = await executePromptNonStreaming(modelName, prompt);
-          const compFullResponse = await compResponse.text;
+          try {
+            const compResponse = await executePromptNonStreaming(modelName, prompt);
+            const compFullResponse = await compResponse.text;
 
-          const compKeywordMentions = detectKeywordMentions(compFullResponse, keywords);
+            const compKeywordMentions = detectKeywordMentions(compFullResponse, keywords);
 
-          const compResult = await Result.create({
-            prompt: promptDoc?._id || null,
-            llmModel: modelName,
-            response: compFullResponse,
-            keywordsMentioned: compKeywordMentions.map((mention) => ({
-              keyword: mention.keyword._id,
-              position: mention.position,
-              sentiment: mention.sentiment,
-              context: mention.context,
-            })),
-            user: user._id,
-          });
+            const compResult = await Result.create({
+              prompt: promptDoc?._id || null,
+              llmModel: modelName,
+              response: compFullResponse,
+              keywordsMentioned: compKeywordMentions.map((mention) => ({
+                keyword: mention.keyword._id,
+                position: mention.position,
+                sentiment: mention.sentiment,
+                context: mention.context,
+              })),
+              user: user._id,
+            });
 
-          return {
-            _id: compResult._id,
-            llmModel: modelName,
-            response: compFullResponse,
-            keywordsMentioned: compKeywordMentions.map((km) => ({
-              ...km,
-              keywordId: km.keyword._id,
-              keywordName: km.keyword.name,
-            })),
-            createdAt: compResult.createdAt,
-          };
+            return {
+              _id: compResult._id,
+              llmModel: modelName,
+              response: compFullResponse,
+              keywordsMentioned: compKeywordMentions.map((km) => ({
+                ...km,
+                keywordId: km.keyword._id,
+                keywordName: km.keyword.name,
+              })),
+              createdAt: compResult.createdAt,
+              status: 'success',
+              error: null,
+            };
+          } catch (error: any) {
+            console.error(`    ✗ Model failed: ${modelName}`, error.message);
+            return {
+              _id: null,
+              llmModel: modelName,
+              response: null,
+              keywordsMentioned: [],
+              createdAt: null,
+              status: 'error',
+              error: error.message || 'Failed to execute model',
+            };
+          }
         })
+      );
+
+      // Extract results from settled promises
+      const comparisonResults = comparisonSettledResults.map((settledResult) =>
+        settledResult.status === 'fulfilled' ? settledResult.value : settledResult.reason
       );
 
       results.push(...comparisonResults);

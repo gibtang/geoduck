@@ -29,6 +29,7 @@ interface PromptExecutionState {
   results: any;
   error: string;
   isExpanded: boolean;
+  modelErrors?: Array<{ model: string; error: string }>;
 }
 
 export default function PromptsPage() {
@@ -186,7 +187,8 @@ export default function PromptsPage() {
         ...state,
         isLoading: true,
         error: '',
-        results: null
+        results: null,
+        modelErrors: []
       }
     }));
 
@@ -213,13 +215,21 @@ export default function PromptsPage() {
 
       const data = await response.json();
 
+      // Extract failed models from results
+      const failedModels = (data.results || []).filter((r: any) => r.status === 'error');
+      const modelErrors = failedModels.map((r: any) => ({
+        model: r.llmModel,
+        error: r.error
+      }));
+
       setExecutionStates(prev => ({
         ...prev,
         [promptId]: {
           ...state,
           isLoading: false,
           results: data.results || [],
-          isExpanded: true
+          isExpanded: true,
+          modelErrors
         }
       }));
 
@@ -390,8 +400,25 @@ export default function PromptsPage() {
                     )}
                   </button>
 
-                  {/* Error Message */}
-                  {state.error && (
+                  {/* Per-Model Error Messages */}
+                  {state.modelErrors && state.modelErrors.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {state.modelErrors.map((modelError, index) => (
+                        <div key={index} className="flex items-start gap-2 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                          <span className="text-red-600 font-bold text-lg">✗</span>
+                          <div>
+                            <p className="text-sm font-medium text-red-800">
+                              {modelError.model.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || modelError.model}
+                            </p>
+                            <p className="text-xs text-red-600 mt-1">{modelError.error}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Global Error Message */}
+                  {state.error && !state.modelErrors?.length && (
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                       <p className="text-sm text-red-600">{state.error}</p>
                     </div>

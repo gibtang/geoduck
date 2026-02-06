@@ -8,7 +8,7 @@ interface ResultsMatrixViewProps {
 }
 
 export default function ResultsMatrixView({ results, keywords }: ResultsMatrixViewProps) {
-  const [viewMode, setViewMode] = useState<'llm' | 'keyword'>('llm');
+  const [viewMode, setViewMode] = useState<'llm' | 'keyword'>('keyword');
   const [expandedKeywords, setExpandedKeywords] = useState<Set<string>>(new Set());
   const [hiddenKeywordIds, setHiddenKeywordIds] = useState<Set<string>>(new Set());
 
@@ -134,6 +134,23 @@ function LLMResultCard({ result, isPrimary, hiddenKeywordIds, expandedKeywords, 
   const visibleKeywords = result.keywordsMentioned?.filter(
     (km: any) => !hiddenKeywordIds.has(km.keywordId)
   ) || [];
+
+  // Handle error state
+  if (result.status === 'error') {
+    return (
+      <div className="p-4 rounded-lg border-l-4 bg-red-50 border-red-500">
+        <div className="flex justify-between items-start mb-2">
+          <span className="font-semibold text-sm text-red-900">
+            {isPrimary ? '🎯 Primary Model' : '⚖️ Comparison'}: {result.model || result.llmModel}
+          </span>
+          <span className="text-red-600 font-bold text-lg">✗</span>
+        </div>
+        <p className="text-sm text-red-700">
+          <span className="font-medium">Error:</span> {result.error}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
