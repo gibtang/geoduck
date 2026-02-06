@@ -6,13 +6,16 @@ describe('Keyword Detection (Mocked)', () => {
       _id: '1',
       name: 'Wireless Headphones',
       description: 'High-quality wireless headphones',
-      keywords: ['bluetooth', 'noise-cancelling', 'audio'],
     },
     {
       _id: '2',
       name: 'Gaming Laptop',
       description: 'Powerful gaming laptop',
-      keywords: ['gaming', 'RTX', 'portable'],
+    },
+    {
+      _id: '3',
+      name: 'bluetooth',
+      description: 'Bluetooth technology',
     },
   ];
 
@@ -26,12 +29,12 @@ describe('Keyword Detection (Mocked)', () => {
       expect(mentions[0].position).toBeGreaterThanOrEqual(0);
     });
 
-    it('should detect keyword by keyword', () => {
+    it('should detect keyword by name', () => {
       const response = 'This bluetooth device is excellent.';
       const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('bluetooth');
       expect(mentions[0].position).toBeGreaterThanOrEqual(0);
     });
 
@@ -119,19 +122,18 @@ describe('Keyword Detection (Mocked)', () => {
       const mentions = detectKeywordMentions(response, mockKeywords);
 
       expect(mentions).toHaveLength(1);
-      expect(mentions[0].keyword.name).toBe('Wireless Headphones');
+      expect(mentions[0].keyword.name).toBe('bluetooth');
       expect(mentions[0].sentiment).toBe('positive');
     });
 
-    it('should handle empty keywords array', () => {
-      const keywordWithoutKeywords = {
-        _id: '3',
+    it('should handle keyword with simple name', () => {
+      const simpleKeyword = {
+        _id: '4',
         name: 'Tablet',
         description: 'A tablet device',
-        keywords: [],
       };
       const response = 'Get a Tablet today';
-      const mentions = detectKeywordMentions(response, [keywordWithoutKeywords]);
+      const mentions = detectKeywordMentions(response, [simpleKeyword]);
 
       expect(mentions).toHaveLength(1);
       expect(mentions[0].keyword.name).toBe('Tablet');
@@ -161,10 +163,10 @@ describe('Keyword Detection (Mocked)', () => {
       expect(highlighted).toContain('**Wireless Headphones**');
     });
 
-    it('should highlight keyword keywords', () => {
+    it('should highlight keyword name', () => {
       const mentions = [
         {
-          keyword: mockKeywords[0],
+          keyword: mockKeywords[2], // bluetooth keyword
           position: 10,
           sentiment: 'positive' as const,
           context: 'This bluetooth device',

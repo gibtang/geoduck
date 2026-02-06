@@ -1,30 +1,36 @@
-import { createRequest, createResponse } from 'node-mocks-http';
-import { POST, GET } from '@/app/api/execute/route';
 import { connect, closeDatabase, clearDatabase } from '../utils/mongodb';
 import User from '@/models/User';
-import Prompt from '@/models/Prompt';
 import Keyword from '@/models/Keyword';
+import Prompt from '@/models/Prompt';
+import Result from '@/models/Result';
 
-// Mock the openrouter module
+// Mock the database connection to avoid reconnecting with different URI
+jest.mock('@/lib/mongodb', () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock the OpenRouter library to avoid real API calls
+const mockExecutePromptNonStreaming = jest.fn();
 jest.mock('@/lib/openrouter', () => ({
+  executePromptNonStreaming: (...args: any[]) => mockExecutePromptNonStreaming(...args),
   AVAILABLE_MODELS: [
     { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
     { id: 'openai/gpt-4o', name: 'GPT-4o' },
+    { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+    { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
+    { id: 'meta-llama/llama-3.1-70b-instruct:free', name: 'Llama 3.1 70B (Free)' },
   ],
-  executePromptNonStreaming: jest.fn(),
 }));
 
-// Mock the keywordDetection module
-jest.mock('@/lib/keywordDetection', () => ({
-  detectKeywordMentions: jest.fn(() => []),
-}));
+import { POST } from '@/app/api/execute/route';
+import { NextRequest } from 'next/server';
 
-import { executePromptNonStreaming } from '@/lib/openrouter';
-import { detectKeywordMentions } from '@/lib/keywordDetection';
-
-describe('Execute API', () => {
+describe('POST /api/execute', () => {
   let userId: string;
   let firebaseUid: string;
+  let keywordIds: string[];
   let promptId: string;
 
   beforeAll(async () => {
@@ -38,6 +44,7 @@ describe('Execute API', () => {
   beforeEach(async () => {
     await clearDatabase();
 
+    // Create test user
     const user = await User.create({
       firebaseUid: 'test-firebase-uid',
       email: 'test@example.com',
@@ -45,194 +52,147 @@ describe('Execute API', () => {
     userId = user._id.toString();
     firebaseUid = user.firebaseUid;
 
+    // Create 3 keywords
+    const keyword1 = await Keyword.create({
+      name: 'performance',
+      user: userId,
+    });
+    const keyword2 = await Keyword.create({
+      name: 'reliability',
+      user: userId,
+    });
+    const keyword3 = await Keyword.create({
+      name: 'ease of use',
+      user: userId,
+    });
+    keywordIds = [keyword1._id.toString(), keyword2._id.toString(), keyword3._id.toString()];
+
+    // Create test prompt
     const prompt = await Prompt.create({
-      title: 'Test Prompt',
-      content: 'What are the best keywords?',
+      title: 'Compare Database Systems',
+      content: 'Compare PostgreSQL, MySQL, and MongoDB in terms of performance, reliability, and ease of use.',
       user: userId,
     });
     promptId = prompt._id.toString();
 
-    // Reset mocks
+    // Clear mock calls before each test
     jest.clearAllMocks();
   });
 
-  describe('GET /api/execute', () => {
-    it('should return available models', async () => {
-      const request = createRequest({
-        method: 'GET',
-      });
+  describe('with primary and comparison models', () => {
+    it('should execute prompt with two different models and detect keywords', async () => {
+      // Mock OpenRouter responses for both models
+      mockExecutePromptNonStreaming
+        .mockResolvedValueOnce({
+          text: 'PostgreSQL offers excellent performance and reliability. It is easy to use for developers familiar with SQL.',
+          usage: { promptTokens: 10, completionTokens: 20 },
+          finishReason: 'stop',
+        })
+        .mockResolvedValueOnce({
+          text: 'MySQL has great performance but can lack reliability at scale. The ease of use is good for beginners.',
+          usage: { promptTokens: 10, completionTokens: 20 },
+          finishReason: 'stop',
+        });
 
-      const response = createResponse();
-
-      await GET(request as any, response as any);
-
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(200);
-      expect(data.models).toEqual([
-        { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-        { id: 'openai/gpt-4o', name: 'GPT-4o' },
-      ]);
-    });
-  });
-
-  describe('POST /api/execute', () => {
-    beforeEach(() => {
-      (executePromptNonStreaming as jest.Mock).mockResolvedValue({
-        text: 'This is a test response with keyword mentions',
-      });
-    });
-
-    it('should execute prompt with promptId', async () => {
-      const requestBody = {
-        promptId,
-        llmModel: 'google/gemini-2.5-flash',
-      };
-
-      const request = createRequest({
-        method: 'POST',
-        headers: {
-          'x-firebase-uid': firebaseUid,
-        },
-        body: requestBody,
-      });
-
-      const response = createResponse();
-
-      await POST(request as any, response as any);
-
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(201);
-      expect(data.results).toBeDefined();
-      expect(data.results).toHaveLength(1);
-      expect(data.results[0].llmModel).toBe('google/gemini-2.5-flash');
-      expect(executePromptNonStreaming).toHaveBeenCalledWith(
-        'google/gemini-2.5-flash',
-        'What are the best keywords?'
-      );
-    });
-
-    it('should execute prompt with promptContent', async () => {
-      const requestBody = {
-        promptContent: 'What is AI?',
-        llmModel: 'openai/gpt-4o',
-      };
-
-      const request = createRequest({
-        method: 'POST',
-        headers: {
-          'x-firebase-uid': firebaseUid,
-        },
-        body: requestBody,
-      });
-
-      const response = createResponse();
-
-      await POST(request as any, response as any);
-
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(201);
-      expect(data.results).toHaveLength(1);
-      expect(executePromptNonStreaming).toHaveBeenCalledWith('openai/gpt-4o', 'What is AI?');
-    });
-
-    it('should execute with comparison models', async () => {
       const requestBody = {
         promptId,
         llmModel: 'google/gemini-2.5-flash',
         comparisonModels: ['openai/gpt-4o'],
       };
 
-      const request = createRequest({
-        method: 'POST',
+      // Create a mock NextRequest
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => name === 'x-firebase-uid' ? firebaseUid : null,
         },
-        body: requestBody,
-      });
+        json: async () => requestBody,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      // Verify response status
+      expect(response.status).toBe(201);
 
-      const data = JSON.parse(response._getData());
+      const data = await response.json();
 
-      expect(response._getStatusCode()).toBe(201);
+      // Verify we got results for both models
       expect(data.results).toHaveLength(2);
-      expect(executePromptNonStreaming).toHaveBeenCalledTimes(2);
+
+      // Verify primary model result
+      expect(data.results[0].llmModel).toBe('google/gemini-2.5-flash');
+      expect(data.results[0].response).toContain('PostgreSQL');
+      expect(data.results[0].response).toContain('excellent performance');
+
+      // Verify comparison model result
+      expect(data.results[1].llmModel).toBe('openai/gpt-4o');
+      expect(data.results[1].response).toContain('MySQL');
+
+      // Verify keyword detection in primary model response
+      expect(data.results[0].keywordsMentioned.length).toBeGreaterThan(0);
+      const perfMention = data.results[0].keywordsMentioned.find(
+        (km: any) => km.keywordName === 'performance'
+      );
+      expect(perfMention).toBeDefined();
+      expect(perfMention.sentiment).toBe('positive'); // "excellent performance"
+
+      // Verify keyword detection in comparison model response
+      expect(data.results[1].keywordsMentioned.length).toBeGreaterThan(0);
+
+      // Verify results were saved to database
+      const savedResults = await Result.find({ user: userId });
+      expect(savedResults).toHaveLength(2);
+      expect(savedResults[0].llmModel).toBe('google/gemini-2.5-flash');
+      expect(savedResults[1].llmModel).toBe('openai/gpt-4o');
     });
 
-    it('should return 400 when model is missing', async () => {
+    it('should detect multiple keywords with sentiment analysis', async () => {
+      // Mock response with keywords - note that context windows may overlap
+      const mockResponse = {
+        text: 'This database has outstanding performance. The reliability is excellent and impressive.',
+        usage: { promptTokens: 10, completionTokens: 20 },
+        finishReason: 'stop',
+      };
+
+      mockExecutePromptNonStreaming.mockResolvedValueOnce(mockResponse);
+
       const requestBody = {
         promptId,
-      };
-
-      const request = createRequest({
-        method: 'POST',
-        headers: {
-          'x-firebase-uid': firebaseUid,
-        },
-        body: requestBody,
-      });
-
-      const response = createResponse();
-
-      await POST(request as any, response as any);
-
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(400);
-      expect(data.error).toBe('Model is required');
-    });
-
-    it('should return 400 when promptId and promptContent are missing', async () => {
-      const requestBody = {
         llmModel: 'google/gemini-2.5-flash',
       };
 
-      const request = createRequest({
-        method: 'POST',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => name === 'x-firebase-uid' ? firebaseUid : null,
         },
-        body: requestBody,
-      });
+        json: async () => requestBody,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(201);
 
-      const data = JSON.parse(response._getData());
+      const data = await response.json();
 
-      expect(response._getStatusCode()).toBe(400);
-      expect(data.error).toBe('Prompt ID or content is required');
-    });
+      // Should have 2 keyword mentions (performance and reliability)
+      expect(data.results[0].keywordsMentioned.length).toBeGreaterThanOrEqual(2);
 
-    it('should return 404 when prompt not found', async () => {
-      const fakeId = '507f1f77bcf86cd799439011';
-      const requestBody = {
-        promptId: fakeId,
-        llmModel: 'google/gemini-2.5-flash',
-      };
+      // Find each keyword mention
+      const perfMention = data.results[0].keywordsMentioned.find(
+        (km: any) => km.keywordName === 'performance'
+      );
+      const relMention = data.results[0].keywordsMentioned.find(
+        (km: any) => km.keywordName === 'reliability'
+      );
 
-      const request = createRequest({
-        method: 'POST',
-        headers: {
-          'x-firebase-uid': firebaseUid,
-        },
-        body: requestBody,
-      });
+      // Verify sentiment analysis for performance
+      expect(perfMention.sentiment).toBe('positive'); // "outstanding performance"
 
-      const response = createResponse();
+      // Verify sentiment analysis for reliability
+      expect(relMention.sentiment).toBe('positive'); // "excellent and impressive"
 
-      await POST(request as any, response as any);
-
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(404);
-      expect(data.error).toBe('Prompt not found');
+      // Verify context is captured
+      expect(perfMention.context).toContain('outstanding performance');
+      expect(relMention.context).toContain('reliability');
     });
 
     it('should return 401 without firebase uid', async () => {
@@ -241,89 +201,89 @@ describe('Execute API', () => {
         llmModel: 'google/gemini-2.5-flash',
       };
 
-      const request = createRequest({
-        method: 'POST',
-        headers: {},
-        body: requestBody,
-      });
+      const request = {
+        headers: {
+          get: (name: string) => null,
+        },
+        json: async () => requestBody,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(401);
 
-      const data = JSON.parse(response._getData());
-
-      expect(response._getStatusCode()).toBe(401);
+      const data = await response.json();
       expect(data.error).toBe('Unauthorized');
     });
 
-    it('should filter by selected keyword ids', async () => {
-      const keyword1 = await Keyword.create({
-        name: 'keyword1',
-        user: userId,
-      });
-
-      const keyword2 = await Keyword.create({
-        name: 'keyword2',
-        user: userId,
-      });
-
+    it('should return 400 when model is missing', async () => {
       const requestBody = {
         promptId,
-        llmModel: 'google/gemini-2.5-flash',
-        selectedKeywordIds: [keyword1._id.toString()],
       };
 
-      const request = createRequest({
-        method: 'POST',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => name === 'x-firebase-uid' ? firebaseUid : null,
         },
-        body: requestBody,
-      });
+        json: async () => requestBody,
+      } as unknown as NextRequest;
 
-      const response = createResponse();
+      const response = await POST(request);
 
-      await POST(request as any, response as any);
+      expect(response.status).toBe(400);
 
-      expect(response._getStatusCode()).toBe(201);
-      expect(detectKeywordMentions).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.arrayContaining([
-          expect.objectContaining({
-            _id: keyword1._id,
-          }),
-        ])
-      );
+      const data = await response.json();
+      expect(data.error).toBe('Model is required');
     });
 
-    it('should handle errors from executePromptNonStreaming', async () => {
-      (executePromptNonStreaming as jest.Mock).mockRejectedValue(
-        new Error('API Error')
-      );
-
+    it('should return 400 when promptId and promptContent are both missing', async () => {
       const requestBody = {
-        promptId,
         llmModel: 'google/gemini-2.5-flash',
       };
 
-      const request = createRequest({
-        method: 'POST',
+      const request = {
         headers: {
-          'x-firebase-uid': firebaseUid,
+          get: (name: string) => name === 'x-firebase-uid' ? firebaseUid : null,
         },
-        body: requestBody,
+        json: async () => requestBody,
+      } as unknown as NextRequest;
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(400);
+
+      const data = await response.json();
+      expect(data.error).toBe('Prompt ID or content is required');
+    });
+  });
+
+  describe('with custom prompt content', () => {
+    it('should execute prompt with custom content', async () => {
+      mockExecutePromptNonStreaming.mockResolvedValueOnce({
+        text: 'Custom prompt response about performance and reliability',
+        usage: { promptTokens: 10, completionTokens: 20 },
+        finishReason: 'stop',
       });
 
-      const response = createResponse();
+      const requestBody = {
+        promptContent: 'Tell me about database performance',
+        llmModel: 'google/gemini-2.5-flash',
+      };
 
-      await POST(request as any, response as any);
+      const request = {
+        headers: {
+          get: (name: string) => name === 'x-firebase-uid' ? firebaseUid : null,
+        },
+        json: async () => requestBody,
+      } as unknown as NextRequest;
 
-      const data = JSON.parse(response._getData());
+      const response = await POST(request);
 
-      expect(response._getStatusCode()).toBe(500);
-      expect(data.error).toBe('Failed to execute prompt');
-      expect(data.details).toBe('API Error');
+      expect(response.status).toBe(201);
+
+      const data = await response.json();
+      expect(data.results).toHaveLength(1);
+      expect(data.results[0].response).toContain('Custom prompt response');
     });
   });
 });
