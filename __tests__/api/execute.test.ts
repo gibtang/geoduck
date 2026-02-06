@@ -23,7 +23,7 @@ jest.mock('@/lib/openrouter', () => ({
     { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' },
     { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus' },
     { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash' },
+    { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
     { id: 'google/gemini-pro', name: 'Gemini Pro' },
     { id: 'x-ai/grok-2', name: 'Grok-2' },
   ],
